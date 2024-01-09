@@ -1,0 +1,3 @@
+target_link_libraries(${PROJECT_NAME} PUBLIC libace_napi.z.so libhilog_ndk.z.so
+                      -Wl,--build-id -Wl,-z,relro -Wl,-z,now -Wl,-z,noexecstack -fPIE -s -Wl,
+                      -Bsymbolic -rdynamic)
