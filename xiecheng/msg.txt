@@ -1,0 +1,14 @@
+C-API组件创建，
+全局的消息轮询，
+全局的NAPI通讯，
+全局的TaskExecutor，
+全局的TurboModule判空，
+全局的TurboModule同步和异步通讯，
+获取instanceId，
+创建RN实例，
+销毁RN实例，
+加载bundle，
+创建surface，
+更新surface，
+NAPI调用方法，
+更新状态
