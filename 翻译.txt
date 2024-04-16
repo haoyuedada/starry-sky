@@ -1,0 +1,15 @@
+比如首页的鸿蒙原生代码，首页的更多按钮点击后是单独的RN页，我们希望从二级页回退回去时是关闭二级页，而不是将应用关闭
+
+查看鸿蒙RN源码，有这样一段逻辑
+
+export class DeviceEventManagerTurboModule extends TurboModule {
+public static readonly NAME = 'DeviceEventManager';
+
+invokeDefaultBackPressHandler() {
+this.ctx.uiAbilityContext.terminateSelf();
+}
+}
+
+当执行invokeDefaultBackPressHandler 会将应用关闭；
+
+希望的是，应用继承RNAbitily后且只有部分页面使用了RN场景下；RN页面回退到原生页面可以有方式不直接关闭应用
