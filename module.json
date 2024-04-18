@@ -1,0 +1,27 @@
+{
+	"app": {
+		"bundleName": "com.rnoh.tester",
+		"debug": true,
+		"versionCode": 1000000,
+		"versionName": "1.0.0",
+		"minAPIVersion": 40100011,
+		"targetAPIVersion": 40100011,
+		"apiReleaseType": "Beta1",
+		"compileSdkVersion": "4.1.0.65",
+		"compileSdkType": "HarmonyOS",
+		"bundleType": "app"
+	},
+	"module": {
+		"name": "rnoh",
+		"type": "har",
+		"deviceTypes": [
+			"default"
+		],
+		"requestPermissions": [
+			{
+				"name": "ohos.permission.INTERNET"
+			}
+		],
+		"installationFree": false
+	}
+}
