@@ -1,0 +1,50 @@
+Subject: [PATCH] 1
+---
+Index: tester/harmony/react_native_openharmony/src/main/cpp/RNOHCorePackage/TurboModules/Animated/NativeAnimatedTurboModule.cpp
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/tester/harmony/react_native_openharmony/src/main/cpp/RNOHCorePackage/TurboModules/Animated/NativeAnimatedTurboModule.cpp b/tester/harmony/react_native_openharmony/src/main/cpp/RNOHCorePackage/TurboModules/Animated/NativeAnimatedTurboModule.cpp
+--- a/tester/harmony/react_native_openharmony/src/main/cpp/RNOHCorePackage/TurboModules/Animated/NativeAnimatedTurboModule.cpp	(revision 67ae7eed9f1c353fe6687290a4bf9154a35c032d)
++++ b/tester/harmony/react_native_openharmony/src/main/cpp/RNOHCorePackage/TurboModules/Animated/NativeAnimatedTurboModule.cpp	(date 1717414496938)
+@@ -56,7 +56,9 @@
+     size_t count) {
+   auto self = static_cast<NativeAnimatedTurboModule*>(&turboModule);
+   auto value = self->getValue(args[0].getNumber());
+-  args[1].getObject(rt).getFunction(rt).call(rt, value);
++  if (count > 1) {
++    args[1].getObject(rt).getFunction(rt).call(rt, value);
++  }
+   return facebook::jsi::Value::undefined();
+ }
+ 
+@@ -108,7 +110,7 @@
+   auto self = static_cast<NativeAnimatedTurboModule*>(&turboModule);
+   auto animationId = args[0].getNumber();
+   auto config = jsi::dynamicFromValue(rt, args[2]);
+-  if (args[3].isUndefined()) {
++  if (count < 4 || args[3].isUndefined()) {
+     self->startAnimatingNode(
+         animationId,
+         args[1].getNumber(),
+@@ -363,18 +365,9 @@
+     react::Tag nodeTag,
+     folly::dynamic const& config,
+     std::function<void(bool)>&& endCallback) {
+-  auto jsThreadCallback = [jsInvoker = this->jsInvoker_,
+-                           endCallback =
+-                               std::move(endCallback)](bool finished) mutable {
+-    // callbacks passed from JS need to be called through the jsInvoker
+-    // to ensure proper handling by React
+-    jsInvoker->invokeAsync([finished, endCallback = std::move(endCallback)] {
+-      endCallback(finished);
+-    });
+-  };
+   auto lock = acquireLock();
+   m_animatedNodesManager.startAnimatingNode(
+-      animationId, nodeTag, config, std::move(jsThreadCallback));
++      animationId, nodeTag, config, std::move(endCallback));
+ }
+ 
+ void NativeAnimatedTurboModule::stopAnimation(react::Tag animationId) {
