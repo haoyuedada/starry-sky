@@ -1,0 +1,41 @@
+return (
+    <View
+      style={{
+        width: '100%',
+        height: '100%',
+        backgroundColor: 'cyan',
+      }}>
+      <View
+        collapsable={false}
+        style={{
+          marginTop: 10,
+        }}>
+        <View
+          style={{
+            marginTop: 10,
+            width: 300,
+            height: 100,
+            // position: 'absolute',
+            zIndex: 2,
+            backgroundColor: 'yellow',
+          }}
+        />
+        <View
+          style={{
+            marginTop: -50,
+            width: 200,
+            height: 100,
+            backgroundColor: 'red',
+          }}
+        />
+        <View
+          style={{
+            marginTop: -50,
+            width: 100,
+            height: 100,
+            backgroundColor: 'green',
+          }}
+        />
+      </View>
+    </View>
+  );
