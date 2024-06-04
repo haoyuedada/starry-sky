@@ -1,0 +1,243 @@
+Subject: [PATCH] switch
+---
+Index: tester/index.js
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/tester/index.js b/tester/index.js
+--- a/tester/index.js	(revision 67ae7eed9f1c353fe6687290a4bf9154a35c032d)
++++ b/tester/index.js	(date 1717487167621)
+@@ -1,7 +1,27 @@
+ // @ts-check
+ import {AppRegistry} from 'react-native';
+ import App from './App';
++// import App from './tests/CHYTest/NativeScroll';
++// import App from './tests/CHYTest/FlatList';
+ import {name as appName} from './app.json';
++// import App from './tests/CHYTest/Absolute';
++// import App from './tests/CHYTest/zIndex';
++// import App from './tests/CHYTest/TextInput';
++// import App from './tests/CHYTest/TextLoading';
++// import App from './tests/CHYTest/AAAAnimate';
++// import App from './tests/CHYTest/MesuerLayout';
++// import App from './tests/CHYTest/AAAFlatlist4';
++// import App from './tests/CHYTest/measureDemo';
++// import App from './tests/CHYTest/AAAScrolloffset';
++// import { AAAFlatlist2 } from './tests/CHYTest/AAAFlatlist2';
++// import { AAAScrolloffset } from './tests/CHYTest/AAAScrolloffset';
++// import { AAAScrollViewLayout } from './tests/CHYTest/AAAScrollViewLayout';
++// Animated.ScrollView 实现吸顶效果在向上滑动过程中出现闪动
++import { AAAAnimatedScrollView } from './tests/CHYTest/AAAAnimatedScrollView'
++import { AAAAnimatedFlatList } from './tests/CHYTest/AAAAnimatedFlatList'
++import { AAAAFontfamily } from './tests/CHYTest/AAAAFontfamily'
++
++
+ import {AppParamsContext} from './contexts';
+ // @ts-expect-error
+ import ReactNativeFeatureFlags from 'react-native/Libraries/ReactNative/ReactNativeFeatureFlags';
+Index: tester/harmony/react_native_openharmony/src/main/cpp/RNOH/arkui/ToggleNode.h
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/tester/harmony/react_native_openharmony/src/main/cpp/RNOH/arkui/ToggleNode.h b/tester/harmony/react_native_openharmony/src/main/cpp/RNOH/arkui/ToggleNode.h
+--- a/tester/harmony/react_native_openharmony/src/main/cpp/RNOH/arkui/ToggleNode.h	(revision 67ae7eed9f1c353fe6687290a4bf9154a35c032d)
++++ b/tester/harmony/react_native_openharmony/src/main/cpp/RNOH/arkui/ToggleNode.h	(date 1717504731185)
+@@ -23,9 +23,10 @@
+   void setToggleNodeDelegate(ToggleNodeDelegate* ToggleNodeDelegate);
+ 
+   ToggleNode& setSelectedColor(facebook::react::SharedColor const& color);
+-  ToggleNode& setUnselectedColor(facebook::react::SharedColor const& color);
+   ToggleNode& setThumbColor(facebook::react::SharedColor const& color);
+   ToggleNode& setFocusable(bool focusable);
++
++  bool getValue();
+   ToggleNode& setValue(bool value);
+ };
+ 
+Index: tester/package.json
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/tester/package.json b/tester/package.json
+--- a/tester/package.json	(revision 67ae7eed9f1c353fe6687290a4bf9154a35c032d)
++++ b/tester/package.json	(date 1717084211521)
+@@ -54,7 +54,7 @@
+     "@react-native-community/eslint-config": "^3.2.0",
+     "@react-native/eslint-config": "^0.74.0",
+     "@react-native/metro-config": "^0.72.6",
+-    "@rnoh/testerino": "^0.0.9",
++    "@rnoh/testerino": "file:../testerino/rnoh-testerino-0.0.9.tgz",
+     "@tsconfig/react-native": "^2.0.2",
+     "@types/chai": "^4.3.4",
+     "@types/d3-scale-chromatic": "^3.0.0",
+Index: tester/tests/index.tsx
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/tester/tests/index.tsx b/tester/tests/index.tsx
+--- a/tester/tests/index.tsx	(revision 67ae7eed9f1c353fe6687290a4bf9154a35c032d)
++++ b/tester/tests/index.tsx	(date 1717421123141)
+@@ -1,5 +1,30 @@
++export * from './CHYTest/AAAscroll';
++export * from './CHYTest/AAAAnimatedScrollView';
++export * from './CHYTest/AAASetNativeProps';
++export * from './CHYTest/AAAAbsolute';
++export * from './CHYTest/AAAAPosition';
++export * from './CHYTest/AAAAnimate';
++export * from './CHYTest/AAAFlatlist1';
++export * from './CHYTest/AAAASwitch';
++export * from './CHYTest/Wxjer';
++export * from './CHYTest/AAAAModal';
++// export * from './CHYTest/AAAAnimated';
++export * from './CHYTest/AAAText';
++export * from './CHYTest/AAAText1';
++export * from './CHYTest/AAAMesuerLayout';
++export * from './CHYTest/AAAMesuerLayout1';
++export * from './CHYTest/AAASafeArea';
++export * from './CHYTest/AAAFocus';
++export * from './CHYTest/AAALinking';
++export * from './CHYTest/AAAAFontfamily';
++export * from './CHYTest/AAAScrolloffset';
+ export * from './AccessibilityInfoTest';
+ export * from './ActivityIndicatorTest';
++export * from './CHYTest/AAAFlatlist1';
++export * from './CHYTest/AAAFlatlist2';
++export * from './CHYTest/AAAFlatlist3';
++export * from './CHYTest/AAAFlatlist4';
++export * from './CHYTest/AAAScrollViewLayout';
+ export * from './AlertTest';
+ export * from './AnimatedEasingTest';
+ export * from './AnimatedTest';
+Index: tester/harmony/react_native_openharmony/src/main/cpp/RNOH/arkui/ToggleNode.cpp
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/tester/harmony/react_native_openharmony/src/main/cpp/RNOH/arkui/ToggleNode.cpp b/tester/harmony/react_native_openharmony/src/main/cpp/RNOH/arkui/ToggleNode.cpp
+--- a/tester/harmony/react_native_openharmony/src/main/cpp/RNOH/arkui/ToggleNode.cpp	(revision 67ae7eed9f1c353fe6687290a4bf9154a35c032d)
++++ b/tester/harmony/react_native_openharmony/src/main/cpp/RNOH/arkui/ToggleNode.cpp	(date 1717504718571)
+@@ -50,23 +50,6 @@
+   return *this;
+ }
+ 
+-ToggleNode& ToggleNode::setUnselectedColor(
+-    facebook::react::SharedColor const& color) {
+-  if (!color) {
+-    maybeThrow(NativeNodeApi::getInstance()->resetAttribute(
+-        m_nodeHandle, NODE_TOGGLE_UNSELECTED_COLOR));
+-    return *this;
+-  }
+-  uint32_t colorValue = *color;
+-  ArkUI_NumberValue preparedColorValue[] = {{.u32 = colorValue}};
+-  ArkUI_AttributeItem colorItem = {
+-      preparedColorValue,
+-      sizeof(preparedColorValue) / sizeof(ArkUI_NumberValue)};
+-  maybeThrow(NativeNodeApi::getInstance()->setAttribute(
+-      m_nodeHandle, NODE_TOGGLE_UNSELECTED_COLOR, &colorItem));
+-  return *this;
+-}
+-
+ ToggleNode& ToggleNode::setThumbColor(
+     facebook::react::SharedColor const& color) {
+   uint32_t colorValue = *color;
+@@ -89,6 +72,13 @@
+   return *this;
+ }
+ 
++bool ToggleNode::getValue() {
++  auto attribute = NativeNodeApi::getInstance()->getAttribute(
++      m_nodeHandle, NODE_TOGGLE_VALUE);
++  auto value = attribute->value[0].i32;
++  return value != 0;
++}
++
+ ToggleNode& ToggleNode::setValue(bool value) {
+   int32_t valueValue = value;
+   ArkUI_NumberValue preparedValue[] = {{.i32 = valueValue}};
+Index: react-native-harmony/package.json
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/react-native-harmony/package.json b/react-native-harmony/package.json
+--- a/react-native-harmony/package.json	(revision 67ae7eed9f1c353fe6687290a4bf9154a35c032d)
++++ b/react-native-harmony/package.json	(date 1717083499715)
+@@ -44,7 +44,7 @@
+     "./harmony/*"
+   ],
+   "dependencies": {
+-    "@rnoh/react-native-harmony-cli": "^0.0.26",
++    "@rnoh/react-native-harmony-cli": "file:../react-native-harmony-cli/rnoh-react-native-harmony-cli-0.0.26.tgz",
+     "colors": "^1.4.0",
+     "fs-extra": "^11.1.1",
+     "metro": "^0.76.3",
+Index: tester/harmony/react_native_openharmony/src/main/cpp/RNOHCorePackage/ComponentInstances/SwitchComponentInstance.cpp
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/tester/harmony/react_native_openharmony/src/main/cpp/RNOHCorePackage/ComponentInstances/SwitchComponentInstance.cpp b/tester/harmony/react_native_openharmony/src/main/cpp/RNOHCorePackage/ComponentInstances/SwitchComponentInstance.cpp
+--- a/tester/harmony/react_native_openharmony/src/main/cpp/RNOHCorePackage/ComponentInstances/SwitchComponentInstance.cpp	(revision 67ae7eed9f1c353fe6687290a4bf9154a35c032d)
++++ b/tester/harmony/react_native_openharmony/src/main/cpp/RNOHCorePackage/ComponentInstances/SwitchComponentInstance.cpp	(date 1717504743384)
+@@ -10,30 +10,27 @@
+ 
+ SwitchComponentInstance::SwitchComponentInstance(Context context)
+     : CppComponentInstance(std::move(context)) {
+-  getLocalRootArkUINode().setToggleNodeDelegate(this);
++  m_toggleNode.setToggleNodeDelegate(this);
+ }
+ 
+ void SwitchComponentInstance::onPropsChanged(SharedConcreteProps const& props) {
+   CppComponentInstance::onPropsChanged(props);
+   if (!m_props || props->onTintColor != m_props->onTintColor) {
+-    getLocalRootArkUINode().setSelectedColor(props->onTintColor);
+-  }
+-  if (!m_props || props->tintColor != m_props->tintColor) {
+-    getLocalRootArkUINode().setUnselectedColor(props->tintColor);
++    m_toggleNode.setSelectedColor(props->onTintColor);
+   }
+   if (!m_props || props->thumbTintColor != m_props->thumbTintColor) {
+-    getLocalRootArkUINode().setThumbColor(props->thumbTintColor);
++    m_toggleNode.setThumbColor(props->thumbTintColor);
+   }
+-  getLocalRootArkUINode().setEnabled(!props->disabled);
++  m_toggleNode.setEnabled(!props->disabled);
+   if (props->rawProps.count("focusable") > 0) {
+     if (!m_props ||
+         props->rawProps["focusable"].asBool() !=
+             m_props->rawProps["focusable"].asBool()) {
+-      getLocalRootArkUINode().setFocusable(props->rawProps["focusable"].asBool());
++      m_toggleNode.setFocusable(props->rawProps["focusable"].asBool());
+     }
+   }
+-  if (!m_props || props->value != m_props->value) {
+-    getLocalRootArkUINode().setValue(props->value);
++  if (props->value != m_toggleNode.getValue()) {
++    m_toggleNode.setValue(props->value);
+   }
+ }
+ 
+@@ -42,6 +39,11 @@
+ }
+ 
+ void SwitchComponentInstance::onValueChange(int32_t& value) {
++  if (m_props == nullptr || m_props->value == value) {
++    // NOTE: when the value is changed via props,
++    // we should not send the event back
++    return;
++  }
+   if (m_eventEmitter != nullptr) {
+     auto onValueChange = facebook::react::SwitchEventEmitter::OnChange();
+     int32_t tag = CppComponentInstance::getTag();
+@@ -49,6 +51,7 @@
+     onValueChange.target = tag;
+     m_eventEmitter->onChange(onValueChange);
+   }
++  m_toggleNode.setValue(m_props->value);
+ }
+ 
+ } // namespace rnoh
