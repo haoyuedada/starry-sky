@@ -1,0 +1,363 @@
+Subject: [PATCH] nativeScroll
+---
+Index: tester/harmony/react_native_openharmony/src/main/cpp/RNOH/arkui/TouchEventDispatcher.h
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/tester/harmony/react_native_openharmony/src/main/cpp/RNOH/arkui/TouchEventDispatcher.h b/tester/harmony/react_native_openharmony/src/main/cpp/RNOH/arkui/TouchEventDispatcher.h
+--- a/tester/harmony/react_native_openharmony/src/main/cpp/RNOH/arkui/TouchEventDispatcher.h	(revision f748184ba0a4db9e0a81af8fa378f975802ed90d)
++++ b/tester/harmony/react_native_openharmony/src/main/cpp/RNOH/arkui/TouchEventDispatcher.h	(date 1717726883348)
+@@ -22,6 +22,18 @@
+       ArkUI_UIInputEvent* event,
+       TouchTarget::Shared const& rootTarget);
+ 
++    /**
++   * @internal
++   * Native apps can place RNSurface inside a Scroll component. When that Scroll
++   * is being scrolled, RN shouldn't recognize swipe gestures as clicks. To
++   * achieve this, RN needs to receive a CANCEL event. At the time of creating
++   * this method, the platform didn't send the CANCEL touch event, so RNOH
++   * provides a way for RN developers to cancel those events manually. They can
++   * register an appropriate onScroll callback and call
++   * rnohCoreContext.cancelTouches().
++   */
++  void cancelActiveTouches();
++
+  private:
+   TouchTarget::Shared registerTargetForTouch(
+       TouchPoint touchPoint,
+Index: tester/harmony/react_native_openharmony/src/main/cpp/RNInstanceFactory.h
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/tester/harmony/react_native_openharmony/src/main/cpp/RNInstanceFactory.h b/tester/harmony/react_native_openharmony/src/main/cpp/RNInstanceFactory.h
+--- a/tester/harmony/react_native_openharmony/src/main/cpp/RNInstanceFactory.h	(revision f748184ba0a4db9e0a81af8fa378f975802ed90d)
++++ b/tester/harmony/react_native_openharmony/src/main/cpp/RNInstanceFactory.h	(date 1717734370272)
+@@ -185,7 +185,7 @@
+     auto componentInstanceDependencies =
+         std::make_shared<ComponentInstance::Dependencies>();
+     componentInstanceDependencies->arkTSChannel = arkTSChannel;
+-    componentInstanceDependencies->arkTSMessageHub = std::move(arkTSMessageHub);
++    componentInstanceDependencies->arkTSMessageHub = arkTSMessageHub;
+     auto customComponentArkUINodeFactory =
+         std::make_shared<CustomComponentArkUINodeHandleFactory>(
+             env, frameNodeFactoryRef, taskExecutor);
+@@ -218,6 +218,7 @@
+         std::move(schedulerDelegateCAPI),
+         std::move(arkTSMessageHandlers),
+         std::move(arkTSChannel),
++        arkTSMessageHub,
+         componentInstanceRegistry,
+         componentInstanceFactory,
+         shouldEnableDebugger,
+Index: tester/harmony/react_native_openharmony/src/main/cpp/RNOH/arkui/TouchEventDispatcher.cpp
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/tester/harmony/react_native_openharmony/src/main/cpp/RNOH/arkui/TouchEventDispatcher.cpp b/tester/harmony/react_native_openharmony/src/main/cpp/RNOH/arkui/TouchEventDispatcher.cpp
+--- a/tester/harmony/react_native_openharmony/src/main/cpp/RNOH/arkui/TouchEventDispatcher.cpp	(revision f748184ba0a4db9e0a81af8fa378f975802ed90d)
++++ b/tester/harmony/react_native_openharmony/src/main/cpp/RNOH/arkui/TouchEventDispatcher.cpp	(date 1717726633538)
+@@ -239,16 +239,20 @@
+ 
+   switch (action) {
+     case UI_TOUCH_EVENT_ACTION_DOWN:
++      VLOG(2) << "TOUCH::DOWN";
+       eventTarget->getTouchEventEmitter()->onTouchStart(touchEvent);
+       break;
+     case UI_TOUCH_EVENT_ACTION_MOVE:
++      VLOG(2) << "TOUCH::MOVE";
+       eventTarget->getTouchEventEmitter()->onTouchMove(touchEvent);
+       break;
+     case UI_TOUCH_EVENT_ACTION_UP:
++      VLOG(2) << "TOUCH::UP";
+       eventTarget->getTouchEventEmitter()->onTouchEnd(touchEvent);
+       break;
+     case UI_TOUCH_EVENT_ACTION_CANCEL:
+     default:
++      DLOG(INFO) << "TOUCH::CANCEL";
+       eventTarget->getTouchEventEmitter()->onTouchCancel(touchEvent);
+       break;
+   }
+@@ -300,13 +304,15 @@
+   touchCancelEvent.changedTouches = {};
+   touchCancelEvent.touches = {};
+   for (auto touch : m_previousEvent.touches) {
+-    touch.timestamp = timestampInSecs;
++    if (timestampInSecs > 0) {
++      touch.timestamp = timestampInSecs;
++    }
+     touchCancelEvent.changedTouches.insert(touch);
+   }
+ 
+   // emit cancel event
+-  DLOG(INFO) << "Cancelling previous touch event";
+   m_previousEvent = touchCancelEvent;
++  DLOG(INFO) << "TOUCH::CANCEL";
+   touchTarget->getTouchEventEmitter()->onTouchCancel(touchCancelEvent);
+   return true;
+ }
+@@ -339,5 +345,21 @@
+   target->getTouchEventEmitter()->onTouchCancel(touchEvent);
+   m_touchTargetByTouchId.erase(touchPoint.id);
+ }
+-
++void TouchEventDispatcher::cancelActiveTouches() {
++  for (auto touch : m_previousEvent.changedTouches) {
++    if (m_touchTargetByTouchId.find(touch.identifier) ==
++        m_touchTargetByTouchId.end()) {
++      continue;
++    }
++    auto touchIdAndTouchTarget = m_touchTargetByTouchId.find(touch.identifier);
++    auto touchTarget = touchIdAndTouchTarget->second.lock();
++    if (touchTarget) {
++      if (m_previousEvent.changedTouches.size() > 0) {
++        DLOG(INFO) << "TOUCH::CANCEL";
++        m_touchTargetByTouchId.erase(touchIdAndTouchTarget->first);
++        touchTarget->getTouchEventEmitter()->onTouchCancel(m_previousEvent);
++      }
++    }
++  }
++}
+ } // namespace rnoh
+Index: tester/harmony/react_native_openharmony/src/main/ets/RNOH/RNInstance.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/tester/harmony/react_native_openharmony/src/main/ets/RNOH/RNInstance.ts b/tester/harmony/react_native_openharmony/src/main/ets/RNOH/RNInstance.ts
+--- a/tester/harmony/react_native_openharmony/src/main/ets/RNOH/RNInstance.ts	(revision f748184ba0a4db9e0a81af8fa378f975802ed90d)
++++ b/tester/harmony/react_native_openharmony/src/main/ets/RNOH/RNInstance.ts	(date 1717727732556)
+@@ -229,6 +229,17 @@
+    * Internal method.
+    */
+   setFrameNodeFactory(frameNodeFactory: FrameNodeFactory | null): void
++
++   /**
++   * @architecture: C-API
++   * Native apps can place RNSurface inside a Scroll component. When that Scroll
++   * is being scrolled, RN shouldn't recognize swipe gestures as clicks. To
++   * achieve this, RN needs to receive a CANCEL event. At the time of creating
++   * this method, the platform didn't send the CANCEL touch event, so RNOH
++   * provides a way for RN developers to cancel those events manually. They can
++   * register an appropriate onScroll callback and call this method.
++   */
++   cancelTouches(): void
+ }
+ 
+ export type RNInstanceOptions = {
+@@ -716,5 +727,8 @@
+   public setFrameNodeFactory(frameNodeFactory: FrameNodeFactory | null) {
+     this.frameNodeFactoryRef.frameNodeFactory = frameNodeFactory
+   }
++  public cancelTouches() {
++    this.postMessageToCpp("CANCEL_TOUCHES", { rnInstanceId: this.id })
++  }
+ }
+ 
+Index: tester/harmony/react_native_openharmony/src/main/ets/RNOH/RNOHCoreContext.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/tester/harmony/react_native_openharmony/src/main/ets/RNOH/RNOHCoreContext.ts b/tester/harmony/react_native_openharmony/src/main/ets/RNOH/RNOHCoreContext.ts
+--- a/tester/harmony/react_native_openharmony/src/main/ets/RNOH/RNOHCoreContext.ts	(revision f748184ba0a4db9e0a81af8fa378f975802ed90d)
++++ b/tester/harmony/react_native_openharmony/src/main/ets/RNOH/RNOHCoreContext.ts	(date 1717728869166)
+@@ -64,6 +64,12 @@
+       safeAreaInsetsProvider,
+       isDebugModeEnabled,
+       launchUri,
++      // cancelTouches
++      () => {
++        rnInstanceRegistry.forEach((rnInstance) => {
++          rnInstance.cancelTouches()
++        })
++      },
+       defaultBackPressHandler
+     )
+   }
+@@ -110,7 +116,11 @@
+      * ArkUI::Want::uri.
+      */
+     public launchUri: string | undefined,
+-
++    /**
++     * @architecture: C-API
++     * Calls RNInstance::cancelTouches for all RNInstances.
++     */
++    public cancelTouches: () => void,
+     public _defaultBackPressHandler: () => void
+   ) {
+   }
+Index: tester/harmony/react_native_openharmony/src/main/cpp/RNOH/arkui/XComponentSurface.h
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/tester/harmony/react_native_openharmony/src/main/cpp/RNOH/arkui/XComponentSurface.h b/tester/harmony/react_native_openharmony/src/main/cpp/RNOH/arkui/XComponentSurface.h
+--- a/tester/harmony/react_native_openharmony/src/main/cpp/RNOH/arkui/XComponentSurface.h	(revision f748184ba0a4db9e0a81af8fa378f975802ed90d)
++++ b/tester/harmony/react_native_openharmony/src/main/cpp/RNOH/arkui/XComponentSurface.h	(date 1717730112971)
+@@ -17,7 +17,9 @@
+       std::shared_ptr<facebook::react::Scheduler> scheduler,
+       ComponentInstanceRegistry::Shared componentInstanceRegistry,
+       ComponentInstanceFactory::Shared const& componentInstanceFactory,
++      ArkTSMessageHub::Shared arkTSMessageHub,
+       facebook::react::SurfaceId surfaceId,
++      int rnInstanceId,
+       std::string const& appKey);
+ 
+   XComponentSurface(XComponentSurface const& other) = delete;
+Index: tester/harmony/react_native_openharmony/src/main/cpp/RNOH/RNInstanceCAPI.cpp
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/tester/harmony/react_native_openharmony/src/main/cpp/RNOH/RNInstanceCAPI.cpp b/tester/harmony/react_native_openharmony/src/main/cpp/RNOH/RNInstanceCAPI.cpp
+--- a/tester/harmony/react_native_openharmony/src/main/cpp/RNOH/RNInstanceCAPI.cpp	(revision f748184ba0a4db9e0a81af8fa378f975802ed90d)
++++ b/tester/harmony/react_native_openharmony/src/main/cpp/RNOH/RNInstanceCAPI.cpp	(date 1717727291599)
+@@ -343,7 +343,9 @@
+           scheduler,
+           m_componentInstanceRegistry,
+           m_componentInstanceFactory,
++          m_arkTSMessageHub,
+           surfaceId,
++          m_id,
+           moduleName));
+ }
+ 
+Index: tester/harmony/react_native_openharmony/src/main/cpp/RNOH/RNInstanceCAPI.h
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/tester/harmony/react_native_openharmony/src/main/cpp/RNOH/RNInstanceCAPI.h b/tester/harmony/react_native_openharmony/src/main/cpp/RNOH/RNInstanceCAPI.h
+--- a/tester/harmony/react_native_openharmony/src/main/cpp/RNOH/RNInstanceCAPI.h	(revision f748184ba0a4db9e0a81af8fa378f975802ed90d)
++++ b/tester/harmony/react_native_openharmony/src/main/cpp/RNOH/RNInstanceCAPI.h	(date 1717734288981)
+@@ -17,6 +17,7 @@
+ #include <react/renderer/scheduler/Scheduler.h>
+ #include <react/renderer/uimanager/LayoutAnimationStatusDelegate.h>
+ 
++#include "ArkTSMessageHub.h"
+ #include "RNOH/ArkTSChannel.h"
+ #include "RNOH/EventDispatcher.h"
+ #include "RNOH/EventEmitRequestHandler.h"
+@@ -58,6 +59,7 @@
+       std::unique_ptr<facebook::react::SchedulerDelegate> schedulerDelegate,
+       std::vector<ArkTSMessageHandler::Shared> arkTSMessageHandlers,
+       ArkTSChannel::Shared arkTSChannel,
++      ArkTSMessageHub::Shared arkTSMessageHub,
+       ComponentInstanceRegistry::Shared componentInstanceRegistry,
+       ComponentInstanceFactory::Shared componentInstanceFactory,
+       bool shouldEnableDebugger,
+@@ -80,6 +82,7 @@
+         m_schedulerDelegate(std::move(schedulerDelegate)),
+         m_shouldEnableDebugger(shouldEnableDebugger),
+         m_shouldEnableBackgroundExecutor(shouldEnableBackgroundExecutor),
++        m_arkTSMessageHub(std::move(arkTSMessageHub)),
+         m_componentInstanceRegistry(componentInstanceRegistry),
+         m_componentInstanceFactory(componentInstanceFactory),
+         m_arkTSChannel(std::move(arkTSChannel)),
+@@ -222,6 +225,7 @@
+   std::vector<ArkTSMessageHandler::Shared> m_arkTSMessageHandlers;
+   ArkTSChannel::Shared m_arkTSChannel;
+   std::string m_bundlePath;
++  ArkTSMessageHub::Shared m_arkTSMessageHub;
+ 
+   void initialize();
+   void initializeScheduler(
+Index: tester/harmony/react_native_openharmony/src/main/cpp/RNOH/arkui/XComponentSurface.cpp
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/tester/harmony/react_native_openharmony/src/main/cpp/RNOH/arkui/XComponentSurface.cpp b/tester/harmony/react_native_openharmony/src/main/cpp/RNOH/arkui/XComponentSurface.cpp
+--- a/tester/harmony/react_native_openharmony/src/main/cpp/RNOH/arkui/XComponentSurface.cpp	(revision f748184ba0a4db9e0a81af8fa378f975802ed90d)
++++ b/tester/harmony/react_native_openharmony/src/main/cpp/RNOH/arkui/XComponentSurface.cpp	(date 1717734490651)
+@@ -3,6 +3,7 @@
+ #include <react/renderer/components/root/RootComponentDescriptor.h>
+ #include "ArkUINodeRegistry.h"
+ #include "NativeNodeApi.h"
++#include "RNOH/Assert.h"
+ #include "TouchEventDispatcher.h"
+ 
+ namespace rnoh {
+@@ -38,14 +39,21 @@
+   }
+ }
+ 
+-class SurfaceTouchEventHandler : public TouchEventHandler {
++// class SurfaceTouchEventHandler : public TouchEventHandler {
++class SurfaceTouchEventHandler : public TouchEventHandler,
++                                 public ArkTSMessageHub::Observer {
+  private:
+   ComponentInstance::Shared m_rootView;
+   TouchEventDispatcher m_touchEventDispatcher;
+-
++  int m_rnInstanceId;
+  public:
+-  SurfaceTouchEventHandler(ComponentInstance::Shared rootView)
+-      : m_rootView(std::move(rootView)) {
++  SurfaceTouchEventHandler(
++      ComponentInstance::Shared rootView,
++      ArkTSMessageHub::Shared arkTSMessageHub,
++      int rnInstanceId)
++      : ArkTSMessageHub::Observer(arkTSMessageHub),
++        m_rootView(std::move(rootView)),
++        m_rnInstanceId(rnInstanceId) {
+     ArkUINodeRegistry::getInstance().registerTouchHandler(
+         &m_rootView->getLocalRootArkUINode(), this);
+     NativeNodeApi::getInstance()->registerNodeEvent(
+@@ -74,13 +82,22 @@
+   void onTouchEvent(ArkUI_UIInputEvent* event) override {
+     m_touchEventDispatcher.dispatchTouchEvent(event, m_rootView);
+   }
++    void onMessageReceived(ArkTSMessage const& message) {
++    LOG(INFO) << "onMessageReceived: " << message.name;
++    if (message.name == "CANCEL_TOUCHES" &&
++        message.payload["rnInstanceId"].asInt() == m_rnInstanceId) {
++      m_touchEventDispatcher.cancelActiveTouches();
++    }
++  }
+ };
+ 
+ XComponentSurface::XComponentSurface(
+     std::shared_ptr<Scheduler> scheduler,
+     ComponentInstanceRegistry::Shared componentInstanceRegistry,
+-    ComponentInstanceFactory::Shared const& componentInstanceFactory,
++    ComponentInstanceFactory::Shared const& componentInstanceFactory, 
++    ArkTSMessageHub::Shared arkTSMessageHub,
+     SurfaceId surfaceId,
++    int rnInstanceId,
+     std::string const& appKey)
+     : m_surfaceId(surfaceId),
+       m_scheduler(std::move(scheduler)),
+@@ -97,7 +114,10 @@
+     return;
+   }
+   m_componentInstanceRegistry->insert(m_rootView);
+-  m_touchEventHandler = std::make_unique<SurfaceTouchEventHandler>(m_rootView);
++  // m_touchEventHandler = std::make_unique<SurfaceTouchEventHandler>(m_rootView);
++  RNOH_ASSERT(arkTSMessageHub != nullptr);
++  m_touchEventHandler = std::make_unique<SurfaceTouchEventHandler>(
++      m_rootView, std::move(arkTSMessageHub), rnInstanceId);
+ }
+ 
+ XComponentSurface::XComponentSurface(XComponentSurface&& other) noexcept
+Index: tester/harmony/react_native_openharmony/src/main/ets/RNOH/RNOHContext.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/tester/harmony/react_native_openharmony/src/main/ets/RNOH/RNOHContext.ts b/tester/harmony/react_native_openharmony/src/main/ets/RNOH/RNOHContext.ts
+--- a/tester/harmony/react_native_openharmony/src/main/ets/RNOH/RNOHContext.ts	(revision f748184ba0a4db9e0a81af8fa378f975802ed90d)
++++ b/tester/harmony/react_native_openharmony/src/main/ets/RNOH/RNOHContext.ts	(date 1717727776719)
+@@ -85,6 +85,7 @@
+       coreContext.safeAreaInsetsProvider,
+       coreContext.isDebugModeEnabled,
+       coreContext.launchUri,
++      coreContext.cancelTouches,
+       coreContext._defaultBackPressHandler
+     )
+     this.devToolsController = coreContext.devToolsController
