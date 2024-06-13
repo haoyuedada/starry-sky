@@ -1,0 +1,111 @@
+Subject: [PATCH] scroll
+---
+Index: tester/harmony/react_native_openharmony/src/main/cpp/RNOHCorePackage/ComponentInstances/ScrollViewComponentInstance.h
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/tester/harmony/react_native_openharmony/src/main/cpp/RNOHCorePackage/ComponentInstances/ScrollViewComponentInstance.h b/tester/harmony/react_native_openharmony/src/main/cpp/RNOHCorePackage/ComponentInstances/ScrollViewComponentInstance.h
+--- a/tester/harmony/react_native_openharmony/src/main/cpp/RNOHCorePackage/ComponentInstances/ScrollViewComponentInstance.h	(revision f748184ba0a4db9e0a81af8fa378f975802ed90d)
++++ b/tester/harmony/react_native_openharmony/src/main/cpp/RNOHCorePackage/ComponentInstances/ScrollViewComponentInstance.h	(date 1718279134129)
+@@ -10,7 +10,7 @@
+ 
+ class ScrollViewComponentInstance
+     : public CppComponentInstance<facebook::react::ScrollViewShadowNode>,
+-      public ScrollNodeDelegate, StackNodeDelegate {
++      public ScrollNodeDelegate {
+  private:
+   enum ScrollState : int32_t { IDLE, SCROLL, FLING };
+   struct ChildTagWithOffset {
+@@ -104,7 +104,6 @@
+   void onScrollStart() override;
+   void onScrollStop() override;
+   float onScrollFrameBegin(float offset, int32_t scrollState) override;
+-  void onAreaChange() override;
+ 
+   void finalizeUpdates() override;
+ 
+Index: tester/harmony/react_native_openharmony/src/main/cpp/RNOH/arkui/StackNode.h
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/tester/harmony/react_native_openharmony/src/main/cpp/RNOH/arkui/StackNode.h b/tester/harmony/react_native_openharmony/src/main/cpp/RNOH/arkui/StackNode.h
+--- a/tester/harmony/react_native_openharmony/src/main/cpp/RNOH/arkui/StackNode.h	(revision f748184ba0a4db9e0a81af8fa378f975802ed90d)
++++ b/tester/harmony/react_native_openharmony/src/main/cpp/RNOH/arkui/StackNode.h	(date 1718279035467)
+@@ -9,7 +9,6 @@
+   virtual void onClick() {};
+   virtual void onHoverIn() {};
+   virtual void onHoverOut() {};
+-  virtual void onAreaChange() {};
+ };
+ 
+ class StackNode : public ArkUINode {
+Index: tester/harmony/react_native_openharmony/src/main/cpp/RNOHCorePackage/ComponentInstances/ScrollViewComponentInstance.cpp
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/tester/harmony/react_native_openharmony/src/main/cpp/RNOHCorePackage/ComponentInstances/ScrollViewComponentInstance.cpp b/tester/harmony/react_native_openharmony/src/main/cpp/RNOHCorePackage/ComponentInstances/ScrollViewComponentInstance.cpp
+--- a/tester/harmony/react_native_openharmony/src/main/cpp/RNOHCorePackage/ComponentInstances/ScrollViewComponentInstance.cpp	(revision f748184ba0a4db9e0a81af8fa378f975802ed90d)
++++ b/tester/harmony/react_native_openharmony/src/main/cpp/RNOHCorePackage/ComponentInstances/ScrollViewComponentInstance.cpp	(date 1718279100405)
+@@ -12,7 +12,6 @@
+ ScrollViewComponentInstance::ScrollViewComponentInstance(Context context)
+     : CppComponentInstance(std::move(context)) {
+   getLocalRootArkUINode().insertChild(m_scrollNode, 0);
+-  m_contentContainerNode.setStackNodeDelegate(this);
+   m_scrollNode.insertChild(m_contentContainerNode);
+   // NOTE: perhaps this needs to take rtl into account?
+   m_scrollNode.setAlignment(ARKUI_ALIGNMENT_TOP_START);
+@@ -314,13 +313,6 @@
+   return offset;
+ }
+ 
+-void ScrollViewComponentInstance::onAreaChange() {
+-  if (!scrollMovedBySignificantOffset(getScrollViewMetrics().contentOffset)) {
+-    return;
+-  }
+-  onScroll();
+-}
+-
+ void ScrollViewComponentInstance::emitOnScrollEndDragEvent() {
+   if (m_disableIntervalMomentum) {
+     disableIntervalMomentum();
+Index: tester/harmony/react_native_openharmony/src/main/cpp/RNOH/arkui/StackNode.cpp
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/tester/harmony/react_native_openharmony/src/main/cpp/RNOH/arkui/StackNode.cpp b/tester/harmony/react_native_openharmony/src/main/cpp/RNOH/arkui/StackNode.cpp
+--- a/tester/harmony/react_native_openharmony/src/main/cpp/RNOH/arkui/StackNode.cpp	(revision f748184ba0a4db9e0a81af8fa378f975802ed90d)
++++ b/tester/harmony/react_native_openharmony/src/main/cpp/RNOH/arkui/StackNode.cpp	(date 1718279012974)
+@@ -14,8 +14,6 @@
+       m_nodeHandle, NODE_ON_CLICK, 0, this));
+   maybeThrow(NativeNodeApi::getInstance()->registerNodeEvent(
+       m_nodeHandle, NODE_ON_HOVER, 0, this));
+-  maybeThrow(NativeNodeApi::getInstance()->registerNodeEvent(
+-      m_nodeHandle, NODE_EVENT_ON_AREA_CHANGE, 0, this));
+ }
+ 
+ void StackNode::insertChild(ArkUINode& child, std::size_t index) {
+@@ -52,11 +50,6 @@
+       }
+     }
+   }
+-  if (eventType == ArkUI_NodeEventType::NODE_EVENT_ON_AREA_CHANGE) {
+-    if (m_stackNodeDelegate != nullptr) {
+-      m_stackNodeDelegate->onAreaChange();
+-    }
+-  }
+ }
+ 
+ void StackNode::onClick() {
+@@ -70,8 +63,6 @@
+       m_nodeHandle, NODE_ON_CLICK);
+   NativeNodeApi::getInstance()->unregisterNodeEvent(
+       m_nodeHandle, NODE_ON_HOVER);
+-  NativeNodeApi::getInstance()->unregisterNodeEvent(
+-      m_nodeHandle, NODE_EVENT_ON_AREA_CHANGE);
+ }
+ 
+ StackNode& StackNode::setAlign(int32_t align) {
