@@ -1,0 +1,25 @@
+asan使能后，排查到的位置跟应用层的业务暂时关联不上关系。
+下一步先把锁给加上。
+
+TextMeasureRegistry.h
+private:
+...
+增加一行：
+  std::mutex m_mutex;
+
+头文件增加：
+#include <mutex>
+
+TextMeasureRegistry.cpp
+setTextMeasureInfo
+getTextStyledString
+getTextMeasureInfo
+getTextMeasureInfoByKey
+eraseTextMeasureInfo
+eraseOldTextMeasureInfo
+共6个接口第一行增加：
+std::lock_guard<std::mutex> lock(m_mutex);
+
+在setTextMeasureInfo， getTextMeasureInfo 函数的第一行（lock之后）和最后一行加上日志
+
+完成后，让伙伴重新出hap包发一下 
