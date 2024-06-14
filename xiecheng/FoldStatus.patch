@@ -1,0 +1,153 @@
+Subject: [PATCH] FoldStatus
+---
+Index: tester/harmony/react_native_openharmony/src/main/cpp/RNOH/ArkTSBridge.cpp
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/tester/harmony/react_native_openharmony/src/main/cpp/RNOH/ArkTSBridge.cpp b/tester/harmony/react_native_openharmony/src/main/cpp/RNOH/ArkTSBridge.cpp
+--- a/tester/harmony/react_native_openharmony/src/main/cpp/RNOH/ArkTSBridge.cpp	(revision f748184ba0a4db9e0a81af8fa378f975802ed90d)
++++ b/tester/harmony/react_native_openharmony/src/main/cpp/RNOH/ArkTSBridge.cpp	(date 1718357047138)
+@@ -57,6 +57,22 @@
+   return DisplayMetrics::fromNapiValue(m_arkJs.getEnv(), napiResult);
+ }
+ 
++auto ArkTSBridge::getFoldStatus() -> float  {
++  auto napiBridgeObject = m_arkJs.getReferenceValue(m_arkTSBridgeRef);
++  auto methodImpl =
++      m_arkJs.getObjectProperty(napiBridgeObject, "getFoldStatus");
++  auto napiResult = m_arkJs.call<0>(methodImpl, {});
++    return m_arkJs.getDouble(napiResult);
++}
++
++auto ArkTSBridge::getIsSplitScreenMode() -> bool  {
++  auto napiBridgeObject = m_arkJs.getReferenceValue(m_arkTSBridgeRef);
++  auto methodImpl =
++      m_arkJs.getObjectProperty(napiBridgeObject, "getIsSplitScreenMode");
++  auto napiResult = m_arkJs.call<0>(methodImpl, {});
++    return m_arkJs.getBoolean(napiResult);
++}
++
+ auto PhysicalPixels::fromNapiValue(napi_env env, napi_value value)
+     -> PhysicalPixels {
+   ArkJS arkJs(env);
+Index: tester/harmony/react_native_openharmony/src/main/ets/RNOH/RNInstancesCoordinator.ets
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/tester/harmony/react_native_openharmony/src/main/ets/RNOH/RNInstancesCoordinator.ets b/tester/harmony/react_native_openharmony/src/main/ets/RNOH/RNInstancesCoordinator.ets
+--- a/tester/harmony/react_native_openharmony/src/main/ets/RNOH/RNInstancesCoordinator.ets	(revision f748184ba0a4db9e0a81af8fa378f975802ed90d)
++++ b/tester/harmony/react_native_openharmony/src/main/ets/RNOH/RNInstancesCoordinator.ets	(date 1718335341498)
+@@ -86,7 +86,9 @@
+       handleError: (err) => {
+         devToolsController.setLastError(err)
+         devToolsController.eventEmitter.emit("NEW_ERROR", err)
+-      }
++      },
++      getFoldStatus: () => displayMetricsManager.getFoldStatus(),
++      getIsSplitScreenMode: () => displayMetricsManager.getIsSplitScreenMode(),
+     });
+     return new RNInstancesCoordinator(napiBridge,
+       dependencies.logger,
+Index: tester/harmony/react_native_openharmony/src/main/cpp/RNOH/ArkTSBridge.h
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/tester/harmony/react_native_openharmony/src/main/cpp/RNOH/ArkTSBridge.h b/tester/harmony/react_native_openharmony/src/main/cpp/RNOH/ArkTSBridge.h
+--- a/tester/harmony/react_native_openharmony/src/main/cpp/RNOH/ArkTSBridge.h	(revision f748184ba0a4db9e0a81af8fa378f975802ed90d)
++++ b/tester/harmony/react_native_openharmony/src/main/cpp/RNOH/ArkTSBridge.h	(date 1718357056208)
+@@ -39,6 +39,8 @@
+ 
+   void handleError(std::exception_ptr ex);
+   DisplayMetrics getDisplayMetrics();
++  float getFoldStatus();
++  bool getIsSplitScreenMode();
+ 
+  protected:
+   ArkJS m_arkJs;
+Index: tester/harmony/react_native_openharmony/src/main/ets/RNOH/DisplayMetricsManager.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/tester/harmony/react_native_openharmony/src/main/ets/RNOH/DisplayMetricsManager.ts b/tester/harmony/react_native_openharmony/src/main/ets/RNOH/DisplayMetricsManager.ts
+--- a/tester/harmony/react_native_openharmony/src/main/ets/RNOH/DisplayMetricsManager.ts	(revision f748184ba0a4db9e0a81af8fa378f975802ed90d)
++++ b/tester/harmony/react_native_openharmony/src/main/ets/RNOH/DisplayMetricsManager.ts	(date 1718357064572)
+@@ -32,6 +32,14 @@
+     this.logger = logger.clone("DisplayMetricsManager");
+   }
+ 
++  public getFoldStatus():display.FoldStatus{
++    return display.getFoldStatus()
++  }
++
++  public getIsSplitScreenMode():boolean{
++    return AppStorage.get("isSplitScreenMode") ?? false
++  }
++
+   public updateWindowSize(windowSize: window.Size | window.Rect) {
+     this.displayMetrics.windowPhysicalPixels.height = windowSize.height;
+     this.displayMetrics.windowPhysicalPixels.width = windowSize.width;
+Index: tester/harmony/react_native_openharmony/src/main/cpp/RNOHCorePackage/ComponentInstances/ModalHostViewComponentInstance.cpp
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/tester/harmony/react_native_openharmony/src/main/cpp/RNOHCorePackage/ComponentInstances/ModalHostViewComponentInstance.cpp b/tester/harmony/react_native_openharmony/src/main/cpp/RNOHCorePackage/ComponentInstances/ModalHostViewComponentInstance.cpp
+--- a/tester/harmony/react_native_openharmony/src/main/cpp/RNOHCorePackage/ComponentInstances/ModalHostViewComponentInstance.cpp	(revision f748184ba0a4db9e0a81af8fa378f975802ed90d)
++++ b/tester/harmony/react_native_openharmony/src/main/cpp/RNOHCorePackage/ComponentInstances/ModalHostViewComponentInstance.cpp	(date 1718357143124)
+@@ -84,7 +84,14 @@
+       m_touchHandler(std::make_unique<ModalHostTouchHandler>(this)) {
+   getLocalRootArkUINode().setSize(facebook::react::Size{0, 0});
+   m_dialogHandler.setDialogDelegate(this);
+-  m_rootStackNode.setPosition({0, 0});
++  auto FoldStatus = ArkTSBridge::getInstance()->getFoldStatus();
++    auto isSplitScreenMode = ArkTSBridge::getInstance()->getIsSplitScreenMode();
++    auto displayMetrics = ArkTSBridge::getInstance()->getDisplayMetrics();
++    if (FoldStatus == 1 && isSplitScreenMode == 1) {
++        m_rootStackNode.setPosition({displayMetrics.screenPhysicalPixels.width/3.08, 0});
++    } else {
++        m_rootStackNode.setPosition({0, 0});
++    }
+ }
+ 
+ void ModalHostViewComponentInstance::onPropsChanged(
+Index: tester/harmony/react_native_openharmony/src/main/ets/RNOH/NapiBridge.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/tester/harmony/react_native_openharmony/src/main/ets/RNOH/NapiBridge.ts b/tester/harmony/react_native_openharmony/src/main/ets/RNOH/NapiBridge.ts
+--- a/tester/harmony/react_native_openharmony/src/main/ets/RNOH/NapiBridge.ts	(revision f748184ba0a4db9e0a81af8fa378f975802ed90d)
++++ b/tester/harmony/react_native_openharmony/src/main/ets/RNOH/NapiBridge.ts	(date 1718335396663)
+@@ -10,7 +10,7 @@
+ import type { InspectorInstance, DisplayMetrics } from './types'
+ import { FatalRNOHError, RNOHError } from "./RNOHError"
+ import type { FrameNodeFactory } from "./RNInstance"
+-
++import display from '@ohos.display';
+ 
+ export type CppFeatureFlag = "ENABLE_NDK_TEXT_MEASURING" | "C_API_ARCH"
+ 
+@@ -18,6 +18,8 @@
+ export interface ArkTSBridgeHandler {
+   getDisplayMetrics: () => DisplayMetrics
+   handleError: (rnohError: RNOHError) => void
++  getFoldStatus: () => display.FoldStatus
++  getIsSplitScreenMode: () => boolean
+ }
+ 
+ export class NapiBridge {
+@@ -229,7 +231,9 @@
+           howCanItBeFixed: (errData.suggestions ?? []),
+           customStack: (errData.stacktrace ?? []).join("\n"),
+         }))
+-      }
++      },
++      getFoldStatus: () => handler.getFoldStatus(),
++      getIsSplitScreenMode: () => handler.getIsSplitScreenMode()
+     });
+   }
+ 
