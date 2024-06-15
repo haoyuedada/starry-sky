@@ -1,13 +1,22 @@
-import React, { useRef, useState } from 'react';
-import { View, PanResponder, Animated, StyleSheet, Dimensions, Text } from 'react-native';
+import React, { useRef, useState, useEffect } from 'react';
+import { View, PanResponder, Animated, StyleSheet, Dimensions, Text, FlatList } from 'react-native';
 
 const { width } = Dimensions.get('window');
 
-const Carousel = () => {
+const CarouselWithList = () => {
   const scrollX = useRef(new Animated.Value(0)).current;
   const position = useRef(new Animated.ValueXY()).current;
   const [currentIndex, setCurrentIndex] = useState(0);
   const slides = ['Slide 1', 'Slide 2', 'Slide 3'];
+  const dataList = Array.from({ length: 30 }, (_, i) => `Item ${i + 1}`);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      goToNextSlide();
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [currentIndex]);
 
   const panResponder = useRef(
     PanResponder.create({
@@ -45,6 +54,11 @@ const Carousel = () => {
     scrollX.setValue(-(width * index));
   };
 
+  const goToNextSlide = () => {
+    const nextIndex = (currentIndex + 1) % slides.length;
+    goToSlide(nextIndex);
+  };
+
   const getSlideStyle = (index) => {
     return {
       transform: [{
@@ -53,17 +67,31 @@ const Carousel = () => {
     };
   };
 
+  const renderItem = ({ item }) => (
+    <View style={styles.listItem}>
+      <Text style={styles.listItemText}>{item}</Text>
+    </View>
+  );
+
   return (
     <View style={styles.container}>
-      {slides.map((slide, index) => (
-        <Animated.View
-          {...panResponder.panHandlers}
-          key={index}
-          style={[styles.slide, getSlideStyle(index)]}
-        >
-          <Text style={styles.text}>{slide}</Text>
-        </Animated.View>
-      ))}
+      <View style={styles.carouselContainer}>
+        {slides.map((slide, index) => (
+          <Animated.View
+            {...panResponder.panHandlers}
+            key={index}
+            style={[styles.slide, getSlideStyle(index)]}
+          >
+            <Text style={styles.text}>{slide}</Text>
+          </Animated.View>
+        ))}
+      </View>
+      <FlatList
+        data={dataList}
+        renderItem={renderItem}
+        keyExtractor={(item, index) => index.toString()}
+        style={styles.list}
+      />
     </View>
   );
 };
@@ -71,6 +99,9 @@ const Carousel = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  carouselContainer: {
+    height: 200,
     flexDirection: 'row',
   },
   slide: {
@@ -83,6 +114,17 @@ const styles = StyleSheet.create({
     fontSize: 24,
     color: '#fff',
   },
+  list: {
+    flex: 1,
+  },
+  listItem: {
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+  },
+  listItemText: {
+    fontSize: 18,
+  },
 });
 
-export default Carousel;
+export default CarouselWithList;
