@@ -1,0 +1,88 @@
+import React, { useRef, useState } from 'react';
+import { View, PanResponder, Animated, StyleSheet, Dimensions, Text } from 'react-native';
+
+const { width } = Dimensions.get('window');
+
+const Carousel = () => {
+  const scrollX = useRef(new Animated.Value(0)).current;
+  const position = useRef(new Animated.ValueXY()).current;
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const slides = ['Slide 1', 'Slide 2', 'Slide 3'];
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (evt, gestureState) => {
+        return Math.abs(gestureState.dx) > Math.abs(gestureState.dy);
+      },
+      onPanResponderMove: Animated.event(
+        [null, { dx: position.x }],
+        { useNativeDriver: false }
+      ),
+      onPanResponderRelease: (evt, gestureState) => {
+        if (gestureState.dx > 50 && currentIndex > 0) {
+          // Swipe right
+          goToSlide(currentIndex - 1);
+        } else if (gestureState.dx < -50 && currentIndex < slides.length - 1) {
+          // Swipe left
+          goToSlide(currentIndex + 1);
+        } else {
+          // Return to the current slide
+          Animated.spring(position.x, {
+            toValue: 0,
+            useNativeDriver: false,
+          }).start();
+        }
+      },
+    })
+  ).current;
+
+  const goToSlide = (index) => {
+    setCurrentIndex(index);
+    Animated.spring(position.x, {
+      toValue: -(width * index),
+      useNativeDriver: false,
+    }).start();
+    scrollX.setValue(-(width * index));
+  };
+
+  const getSlideStyle = (index) => {
+    return {
+      transform: [{
+        translateX: Animated.add(position.x, scrollX),
+      }],
+    };
+  };
+
+  return (
+    <View style={styles.container}>
+      {slides.map((slide, index) => (
+        <Animated.View
+          {...panResponder.panHandlers}
+          key={index}
+          style={[styles.slide, getSlideStyle(index)]}
+        >
+          <Text style={styles.text}>{slide}</Text>
+        </Animated.View>
+      ))}
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    flexDirection: 'row',
+  },
+  slide: {
+    width: width,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'skyblue',
+  },
+  text: {
+    fontSize: 24,
+    color: '#fff',
+  },
+});
+
+export default Carousel;
