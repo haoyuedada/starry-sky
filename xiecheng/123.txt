@@ -1,0 +1,7 @@
+        .onScrollStart(() => {
+          // this.ctx.rnInstance.emitDeviceEvent('scrollSatatus', { 'isScrolling': true})
+          this.ctx.rnInstance.emitDeviceEvent('scrollSatatus', { params: {isScrolling: true}})
+        })
+        .onScrollStop(() => {
+          this.ctx.rnInstance.emitDeviceEvent('scrollSatatus', { params: {isScrolling: false}})
+        })
