@@ -1,0 +1,19 @@
+Subject: [PATCH] Fix: child component not render in CustomNode
+---
+Index: tester/harmony/react_native_openharmony/src/main/cpp/RNOH/arkui/CustomNode.cpp
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/tester/harmony/react_native_openharmony/src/main/cpp/RNOH/arkui/CustomNode.cpp b/tester/harmony/react_native_openharmony/src/main/cpp/RNOH/arkui/CustomNode.cpp
+--- a/tester/harmony/react_native_openharmony/src/main/cpp/RNOH/arkui/CustomNode.cpp	(revision 86b5249a505ea12e5ba71add4121a2606f38c099)
++++ b/tester/harmony/react_native_openharmony/src/main/cpp/RNOH/arkui/CustomNode.cpp	(revision a05e52b5dccd416bb3a3e912542407aa88f1a6b8)
+@@ -60,6 +60,7 @@
+ void CustomNode::insertChild(ArkUINode& child, std::size_t index) {
+   maybeThrow(NativeNodeApi::getInstance()->insertChildAt(
+       m_nodeHandle, child.getArkUINodeHandle(), static_cast<int32_t>(index)));
++    NativeNodeApi::getInstance()->markDirty(
++        child.getArkUINodeHandle(), ArkUI_NodeDirtyFlag::NODE_NEED_MEASURE);;
+ }
+ 
+ void CustomNode::addChild(ArkUINode &child){
