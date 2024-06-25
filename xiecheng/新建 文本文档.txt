@@ -1,0 +1,608 @@
+判断”
+
+云函数打包完成后，需要到 AppGallery 错
+
+在 column 和 Row 容器组件中，aligntems 错
+⾸选项 preferences 是以 Key  错
+⾸选项是⾮关系数据库，遵循 ACID 特性 错
+每调⽤⼀次 router.pushUrl()万法，默认情 对
+所有使⽤@Component 修饰的⾃定义组件都⽀持 onPageShow错
+使⽤端云⼀体化开发，⽆需⾃⼰搭建服务器，并进⾏运维了 对
+每⼀个⾃定义组件都有⾃⼰的⽣命周期 对
+Harmonyos 应⽤可以兼容 OpenHarmony ⽣态 对
+
+worker 线程不⽀持 UI 操作 对
+基于端云⼀体化开发，开发者需要精通前端、后端  错
+只要使⽤端云⼀-体化的云端资源就需要⽀付费⽤ 错
+ArkUI 是声明式开发范式 对
+
+
+
+
+
+选择
+HUKS 中⽂全称是什么  通⽤密钥库系统
+元服务包名必须以哪个字段结尾?   .hmservice
+引⽤ ohpm 三⽅库的包依赖是在哪个配置⽂件中  oh-package.json5
+发布后的鸿蒙应⽤可以在哪⾥获取  华为应⽤市场
+开发者在DevEco 中可以通过什么⽅式使⽤端云⼀-体化  ⼯程模板
+Row 组件中有两个 Text 组件哪个属性可以实现左右两端对⻬: FlexAlign.SpaceBetween
+发布应⽤时需要创建profile时类型选择什么类型 发布
+Harmonyos 提供的 webview 能⼒是否⽀持与 H5 双向通信 ⽀持
+Webview 在 HarmonyOS 中的⼊⼝是通过什么组件体现的 Web组件
+关于容器组件 Row 和 Column下⾯说法错误的是: Row 的⼦组件在交⼜轴⽅向上的对⻬⽅式使⽤ 
+发布开放式测试版本后，怎么追加测试⽤户 需要重新发布新的测试版本追加⽤户
+下⾯哪个组件不能包含⼦组件 LoadingProgress
+添加⽤户信息时，如果帐号使⽤⼿机号码，  86-1891234
+开放式测试版本发布后，受邀测试⽤户如何体验 点击邀请链接接收邀请，⾃动跳转到称
+端云⼀体化当前⽀持最低的鸿蒙 API 版本是 9
+认证服务⽀持下列哪种帐号认证 华为帐号
+元服务包由⼀个或多个 HAP 包组成，每个 HAP 包不得超过  10MB
+@state 修饰的状态数据被修改时会触发组件  build ⽅法
+下列哪种组合⽅式不能实现双向数据同步 @State 和@Prop
+关于 UIAbility 的启动模式，下列说法错误的是  muliton 为多实例模式，每次 startAbility 
+发布应⽤时要创建证书，证书类型选择什么类型 发布证书
+关于 Tabs 组件⻚签的位置设置  当barPosition 为 End，vertical 属性为true时
+
+⾃定义组件的 aboutToAppear() 在什么时机执⾏ build 函数之前
+上传鸿蒙应⽤或元服务软件包时  app
+创建应⽤时，应⽤包名需要和 app.json5  bundleName
+模块提供了全双⼯通信协议 WebSocket
+关于@state 状态数据特征描述错误的是 @State 查量可以不⽤给定初始值
+关于 video 组件的回调事件，下列说法错误的是 onStart 视频播放时触发该事件
+
+worker 线程最⼤同时激活数 .8
+下⾯哪个⽅法，可以跳转到⼀个新⻚⾯，  router.replaceUrl()
+在下⾯哪个⽂件中可以设置⻚⾯的   main_pages.json
+引⽤ ohpm 三⽅库的包依赖是在哪个配置⽂件中 oh-package.json5
+跨端迁移和协同是哪个鸿蒙特征的能⼒ 统⼀⽣态
+
+
+
+
+
+
+多选题
+⼀次开发多端部署的三个层次有哪些  界⾯级⼀多功能级⼀多⼯程级⼀多
+⾃定义组件的组件化特点有哪些 可组合 可重⽤ 配置化⽣命周期 数据驱动更新
+公共事件服务为应⽤程序提供哪些能⼒ 订阅公共 发布公共 取消订阅公共
+以下关于 ArkTS 声明式开发范式的基本组成说明正确的是 全选
+
+鸿蒙特征包含哪些场景化能⼒  ⼀次开发 可分可合 .统⼀⽣态
+端云⼀体化已经集成以下哪些服务 SDK 云函数  云数据库  云存储
+端云⼀体化中的云函数⽀持哪些操作  编写函数，测试，打包，部署
+下⾯哪些容器组件是可以滚动的 Scroll  List Grid
+entry 下的 module.json.5 中包含以下哪些信息  Ability 的配置信息  设备类型  应⽤权限申请列表
+端云⼀体化⼯程⽬录结构分为哪些部分  端开发⼯程  云开发⼯程  端侧公共库
+UIAbility 的启动模式有哪些  singleton specified multition
+
+
+
+云函数打包完成后，需要到 AppGallery Connect 创建对应函数的触发器才可以在端侧中调用
+
+错
+在 column 和 Row 容器组件中，aligntems 用于设置子组件在主轴方向上的对齐格式，justifycontent 用于设置子组件在交叉轴方向上的对齐格式
+
+错
+首选项 preferences 是以 Key-Value 形式存储数据，其中 Key 是可以重复
+
+错
+首选项是非关系数据库，遵循 ACID 特性
+
+错
+每调用一次 router.pushUrl()万法，默认情况下，页面栈数量会加 1，页面栈支持的最大页面数量为 32
+
+对
+所有使用@Component 修饰的自定义组件都支持 onPageShow，onBackPress 和 onPageHide 生命周期函数
+
+错
+使用端云一体化开发，无需自己搭建服务器，并进行运维了
+
+对
+每一个自定义组件都有自己的生命周期
+
+对
+Harmonyos 应用可以兼容 OpenHarmony 生态
+
+对
+worker 线程不支持 UI 操作
+
+对
+基于端云一体化开发，开发者需要精通前端、后端不同的开发语言
+
+错
+只要使用端云一-体化的云端资源就需要支付费用
+
+错
+ArkUI 是声明式开发范式
+
+对
+选择题
+HUKS 中文全称是什么
+
+B.通用密钥库系统
+元服务包名必须以哪个字段结尾?
+
+A. .hmservice
+引用 ohpm 三方库的包依赖是在哪个配置文件中
+
+C. oh-package.json5
+发布后的鸿蒙应用可以在哪里获取?
+
+A.华为应用市场
+开发者在 DevEco studio 中，可以通过什么方式使用端云一-体化?
+
+B.工程模板
+Row 组件中有两个 Text 组件，如果使用 justifycontent 对齐方式，下面哪个属性可以实现左右两端对齐:
+
+D.FlexAlign.SpaceBetween
+发布应用时需要创建 Profile 时，类型选择什么类型?
+
+B.发布
+Harmonyos 提供的 webview 能力是否支持与 H5 双向通信
+
+A.支持
+Webview 在 HarmonyOS 中的入口是通过什么组件体现的
+
+C. Web组件
+关于容器组件 Row 和 Column，下面说法错误的是:
+
+D.Row 的子组件在交又轴方向上的对齐方式使用 alignltems 属性来设置，其参数类型为 HorizontalAlign.
+发布开放式测试版本后，怎么追加测试用户?
+
+B.需要重新发布新的测试版本追加用户
+下面哪个组件不能包含子组件
+
+D.LoadingProgress
+添加用户信息时，如果帐号使用手机号码，以下哪种输入格式正确?
+
+A.86-189****1234
+开放式测试版本发布后，受邀测试用户如何体验?
+
+B.点击邀请链接接收邀请，自动跳转到应用市场或者进入应用市场搜索待体验的元服务名称
+端云一体化当前支持最低的鸿蒙 API 版本是
+
+D.9
+认证服务支持下列哪种帐号认证
+
+C.华为帐号
+元服务包由一个或多个 HAP 包组成，每个 HAP 包不得超过()，以提供秒开体验。
+
+B.10MB
+@state 修饰的状态数据被修改时会触发组件的（）方法进行 UI 界面更新
+
+A build 方法
+下列哪种组合方式不能实现子组件从父子组件之间双向数据同步
+
+D.@State 和@Prop
+关于 UIAbility 的启动模式，下列说法错误的是
+
+C. muliton 为多实例模式，每次 startAbility 都会启动一个新的实例，系统默认为 muliton 为模式。
+发布应用时要创建证书，证书类型选择什么类型?
+
+B. 发布证书
+关于 Tabs 组件页签的位置设置，下面描述错误的是
+
+D. 当 barPosition 为 End，vertical 属性为 true 时，页签位于容器底部
+自定义组件的 aboutToAppear() 在什么时机执行
+
+B.build 函数之前
+上传鸿蒙应用或元服务软件包时，软件包的格式是什么?
+
+B. app
+创建应用时，应用包名需要和 app.json5 文件中哪个字段保持一致?
+
+C. bundleName
+模块提供了全双工通信协议
+
+B. WebSocket
+关于@state 状态数据特征，下列描述错误的是:
+
+C. @State 查量可以不用给定初始值
+关于 video 组件的回调事件，下列说法错误的是
+
+A.onStart 视频播放时触发该事件，可以在这里获取视频时长
+worker 线程最大同时激活数
+
+C.8
+下面哪个方法，可以跳转到一个新页面，并销毁当前页面
+
+B. router.replaceUrl()
+在下面哪个文件中可以设置页面的路径配置信息?
+
+A. main_pages.json
+引用 ohpm 三方库的包依赖是在哪个配置文件中
+
+C. oh-package.json5
+发布开放式测试版本后，还需要人工审核吗?
+
+B.不需要
+元服务创建测试用户时，用户列表存储位置需要选择
+
+B.中国
+应用包名不能包合一些保留字段，以下哪个字段符合规范?
+
+A. .test.
+跨端迁移和协同是哪个鸿蒙特征的能力
+
+C.统一生态
+多选题
+一次开发多端部署的三个层次有哪些？
+
+A. 界面级一多
+B. 功能级一多
+C. 工程级一多
+自定义组件的组件化特点有哪些
+
+A. 可组合
+B. 可重用
+C. 配置化生命周期
+D. 数据驱动更新
+鸿蒙应用/元服务上架过程上传软件包常见的问题有哪些
+
+A. 软件包中的发布 Profile 文件和当前上传软件包的应用不匹配
+B. 软件包中的发布证书与发布 Profile 文件中的发布证书不匹配
+C. 软件包未签名导制提示非法软件包
+D. 软件包中使用证书已经失效过者过期
+公共事件服务为应用程序提供哪些能力
+
+B. 订阅公共事件
+C. 发布公共事件
+D. 取消订阅公共事件
+以下关于 ArkTS 声明式开发范式的基本组成说明正确的是
+
+A.装饰器:用来装饰类.结构体、方法以及变量，赋予其特殊的含义，例如@Entry 表示这是个入口组件。
+B.自定义组件:可复用的 UI 单元，可组合其它组件。
+C. UI 描述:声明式的方法来描述 U 的结构,例如 build() 方法中的代码块。
+D. 内置组件: ArkTS 中默认内置的基本组件和布局组件,开发者可以直接调用，如 Column、Text、Divider、Button 等。
+E.属性方法:用于组件属性的配置,统一通过属性方法进行设置,如 fontSize()、width()、height()、color() 等。
+F. 事件方法:用于添加组件对事件的响应逻辑，统-通过事件方法进行设置，如跟随在 Button 后面的 onClick()。
+鸿蒙特征包含哪些场景化能力
+
+A.一次开发、多端部警
+B.可分可合、自由流转
+C.统一生态、原生智能
+端云一体化已经集成以下哪些服务 SDK
+
+A. 云函数
+B.云数据库
+C.云存储
+端云一体化中的云函数支持哪些操作
+
+A. 编写函数
+B. 测试函数
+C. 打包函数
+D. 部署函数
+下面哪些组件层次结构是正确的
+
+A. Text>Span
+B. Button>Column>lmage
+E.Column>Row>Button
+UIAbility 的生命周期包括哪些函数?
+
+A. onCreate
+B. onForeground
+C. onBackground
+D. onDestroy
+下面哪些容器组件是可以滚动的
+
+A. Scroll
+B. List
+D. Grid
+entry 下的 module.json.5 中包含以下哪些信息
+
+B. Ability 的配置信息
+C. 设备类型信息
+D. 应用权限申请列表
+端云一体化工程目录结构分为哪些部分
+
+A. 端开发工程(Application)
+B. 云开发工程(CloudProgram)
+C. 端侧公共库(External Libraries)
+UIAbility 的启动模式有哪些
+
+A. singleton
+B. specified
+C. multition
+
+========================================================================
+1、HarmonyOS应用可以兼容OpenHarmony生态
+正确(True)
+
+2、云函数打包完成后，需要到AppGallery Connect创建对应函数的触发器才可以在端侧中调用
+错误(False)
+
+3、Ability是系统调度应用的最小单元，是能够完成一个独立功能的组件。一个应用可以包含一个或多个Ability。
+正确(True)
+
+4、使用http模块发起网络请求时，必须要使用on(‘headersReceive’）订阅请求头，请求才会成功。
+错误(False)
+
+5、Video组件可以支持本地视频路径和网络路径播放。播放网络视频时，需要申请权限ohos.permission.INTERNET。
+正确(True)
+
+6、Tabs组件仅可包含子组件TabsContent，每一个页签对应一个内容视图即TabContet组件。
+正确(True)
+
+7、每调用一次router.pushUrl()方法，默认情况下，页面栈数量会加1，页面栈支持的最大页面数量为32。
+正确(True)
+
+8、@CustomDialog装饰器用于装饰自定义弹窗组件，使得弹窗可以动态设置内容及样式。
+正确(True)
+
+9、Web组件对于所有的网页都可以使用zoom(factor: number)方法进行缩放。
+错误(False)
+
+10、每一个自定义组件都有自己的生命周期
+正确(True)
+
+11、首选项是非关系数据库，遵循ACID特性
+错误(False)
+
+12、使用端云一体化开发，无需自己搭建服务器，并进行运维了。
+正确(True)
+
+13、所有使用@Component修饰的自定义组件都支持onPageShow，onBackPress和onPageHide生命周期函数。
+错误(False)
+
+14、只要使用端云一体化的云端资源就需要支付费用
+错误(False)
+
+15、首选项preferences是以Key-Value形式存储数据，其中Key是可以重复。
+错误(False)
+
+16、基于端云一体化开发，开发者需要精通前端、后端不同的开发语言。
+错误(False)
+
+17、Worker线程不支持UI操作
+正确(True)
+
+18、在Column和Row容器组件中，alignItems用于设置子组件在主轴方向上的对齐格式，justifyContent用于设置子组件在交叉轴方向上的对齐格式
+错误(False) 注：看清楚顺序，这个题对其格式互换是正确的
+
+19用哪一种装饰器修饰的组件可作为页面入口组件？
+B. @Entry
+
+20、关于UIAbility的启动模式，下列说法错误的是：
+C. standard为标准模式，每次startAbility都会启动一个新的实例，系统默认为standard模式。
+
+21、发起网络数据请求需要导入以下哪个模块？
+A. import http from ‘@ohos.net.http’
+
+22、在下面哪个文件中可以设置页面的路径配置信息？
+A. main_pages.json
+
+23、首选项preferences值的存储支持哪些数据类型？
+D. 数字型、字符型、布尔型以及这3种类型的数组类型。
+
+24、关于Button组件，下面哪个样式是胶囊型按钮：
+A. ButtonType.Capsule
+
+25、例如现在要实现一个广告弹窗，包含图片和文本等信息，使用下面那种弹窗可以实现
+B. @CustomDialog
+
+26、关于Web组件，下面描述错误的是：
+D. 使用Web组件访问在线和离线网页都需要添加ohos.permission.INTERNET权限。
+
+27、使用Image组件加载网络图片需要如下哪种权限？
+B. ohos.permission.INTERNET
+
+28、页面路由需要导入以下哪个模块？
+B. import router from ‘@ohos.router’
+
+29、首选项key的最大长度限制大小为（）字节？
+C. 80
+
+30、关于Video组件的回调事件，下列说法错误的是：
+A. onStart视频播放时触发该事件，可以在这里获取视频时长。
+
+31、关于Resource是资源引用类型描述错误的是：
+C. Resource支持所有的数据类型。
+
+32、下面哪个方法，可以跳转到一个新页面，并销毁当前页面。
+B. router.replaceUrl()
+
+33、于Tabs组件页签的位置设置，下面描述错误的是
+D. 当barPosition为End ，vertical属性为true时，页签位于容器底部。
+
+34、下面哪一个事件方法可以获取到List滑动的偏移量
+A. onScroll
+
+35、发布开放式测试版本后，还可以再追加测试用户吗？
+B. 不可以
+
+36、发布后的鸿蒙应用可以在哪里获取？
+A. 华为应用市场
+
+37、关于@State状态数据特征，下列描述错误的是：
+. @State变量可以不用给定初始值。
+
+38、上传鸿蒙应用或元服务软件包时，软件包的格式是什么？
+B. .app
+
+39、发布开放式测试版本后，还可以再更新版本吗？
+A. 可以
+
+40、关于容器组件Row和Column，下面说法错误的是：
+D. Row的子组件在交叉轴方向上的对齐方式使用alignItems属性来设置，其参数类型为HorizontalAlign。
+
+41、元服务包由一个或多个HAP包组成，每个HAP包不得超过（），以提供秒开体验。
+B. 10MB
+
+42、下面哪个组件不能包含子组件：
+D. LoadingProgress
+
+43、开放式测试版本发布后，受邀测试用户如何体验？
+B. 进入服务中心，打开“开发者测试”开关，在最下方的“服务测试”找到待体验的元服务
+
+44、发布应用时要创建证书，证书类型选择什么类型？
+B. 发布证书
+
+45、关于Video组件的回调事件，下列说法错误的是：
+A. onStart视频播放时触发该事件，可以在这里获取视频时长。
+
+46、（）模块提供了全双工通信协议
+B. WebSocket
+
+47、Worker线程最大同时激活数 存疑，没有最大线程，但是有内存啥的限制 选 9
+
+48、跨端迁移和协同是哪个鸿蒙特征的能力
+D. 自由流转
+
+49、Webview在HarmonyOS中的入口是通过什么组件体现的
+C. Web组件
+
+50、HUKS中文全称是什么
+B. 通用密钥库系统
+
+51、端云一体化当前支持最低的鸿蒙API版本是
+D. 9
+
+52、发布开放式测试版本后，还需要人工审核吗？
+B. 不需要
+
+53、引用ohpm三方库的包依赖是在哪个配置文件中
+C. oh-package.json5
+
+54、元服务创建测试用户时，用户列表存储位置需要选择
+B. 中国
+
+55、认证服务支持下列哪种帐号认证
+C. 华为帐号
+
+56、下列哪种组合方式不能实现子组件从父子组件之间双向数据同步。
+D. @State和@Prop
+
+57、@State修饰的状态数据被修改时会触发组件的（）方法进行UI界面更新
+A. build方法
+
+58、关于UIAbility的启动模式，下列说法错误的是：
+C. muliton为多实例模式，每次startAbility都会启动一个新的实例，系统默认为muliton为模式。
+
+59、自定义组件的aboutToAppear()在什么时机执行
+B. build函数之前
+
+60、元服务包名必须以哪个字段结尾?
+A. .hmservice
+
+61、发布开放式测试版本后，怎么追加测试用户？
+B. 需要重新发布新的测试版本追加用户
+
+62、Row组件中有两个Text组件，如果使用justifyContent对齐方式，下面哪个属性可以实现左右两端对齐：
+D. FlexAlign.SpaceBetween
+
+63、HarmonyOS提供的Webview能力是否支持与H5双向通信
+A. 支持
+
+64、应用包名不能包含一些保留字段，以下哪个字段符合规范?
+A. .test.
+
+65、鸿蒙特征包含哪些场景化能力
+A. 一次开发、多端部署
+B. 可分可合、自由流转
+C. 统一生态、原生智能
+
+66、鸿蒙应用/元服务上架过程上传软件包常见的问题有哪些
+A. 软件包中的发布Profile文件和当前上传软件包的应用不匹配
+B. 软件包中的发布证书与发布Profile文件中的发布证书不匹配
+C. 软件包未签名导制提示非法软件包
+D. 软件包中使用证书已经失效过者过期
+
+67、entry下的module.json5中包含以下哪些信息
+B. Ability的配置信息
+C. 设备类型信息
+D. 应用权限申请列表
+
+68、下面哪些容器组件是可以滚动的
+A. Scroll
+B. List
+D. Grid
+
+69、下面哪些是Ability的生命周期回调函数？
+A. onCreate
+B. onDestroy
+E. onForeground
+F. onBackground
+
+70、下面哪些组件层次结构是正确的。
+A. Text>Span
+B. Button>Column>Image
+E. Column>Row>Button
+
+71、端云一体化已经集成以下哪些服务SDK
+A. 云函数
+B. 云数据库
+C. 云存储
+
+72、UIAbility的启动模式有哪些
+A. singleton
+B. specified
+C. multition
+
+73、公共事件服务为应用程序提供哪些能力
+B. 订阅公共事件
+C. 发布公共事件
+D. 取消订阅公共事件
+
+74、端云一体化工程目录结构分为哪些部分 不知道
+A. 端开发工程（Application）
+B. 云开发工程（CloudProgram）
+C. 端侧公共库（External Libraries）
+D. 公共资源库（Resource）
+
+75、端云一体化中的云函数支持哪些操作
+A. 编写函数
+B. 测试函数
+C. 打包函数
+D. 部署函数
+
+76、关于Tabs组件和TabContent组件，下列描述正确的是
+A. TabContent组件不支持设置通用宽度属性，其宽度等于Tabs组件的barWidth属性。
+B. TabContent组件不支持设置通用高度属性，其高度由父组件Tabs高度与TabBar组件高度决定。
+C. TabsController用于控制Tabs组件进行页签切换，不支持一个TabsController控制多个Tabs组件。
+D. TabContent组件的tabBar属性支持使用@Builder构造器生成的组件。
+
+77、以下关于ArkTS声明式开发范式的基本组成说明正确的是
+A. 装饰器：用来装饰类、结构体、方法以及变量，赋予其特殊的含义，例如@Entry表示这是个入口组件。
+B. 自定义组件：可复用的 UI 单元，可组合其它组件。
+C. UI描述：声明式的方法来描述UI的结构，例如build()方法中的代码块。
+D. 内置组件：ArkTS中默认内置的基本组件和布局组件，开发者可以直接调用，如Column、Text、Divider、Button等。
+E. 属性方法：用于组件属性的配置，统一通过属性方法进行设置，如fontSize()、width()、height()、color() 等。
+F. 事件方法：用于添加组件对事件的响应逻辑，统一通过事件方法进行设置，如跟随在Button后面的onClick()。
+
+78、针对包含文本元素的组件，例如Text、Button、TextInput等，可以使用下列哪些属性：
+A. fontColor
+B. fontSize
+C. fontStyle
+D. fontWeight
+E. fontFamily
+
+79、关于ForEach(arr, itemGenerator, index)组件的描述正确的是：
+B. 第一个参数必须是数组，提供循环渲染的数据源。
+C. 第二个参数生成子组件的lambda函数，为数据源中的每个数组项生成子组件。
+D. 第三个参数为匿名函数，用于给定数组项生成唯一且稳定的键值。
+
+80、ArkUI 是声明式开发范式
+正确(True)
+
+81、开发者在DevEco Studio中，可以通过什么方式使用端云一体化？
+B. 工程模板
+
+82、认证服务支持下列哪种帐号认证
+C. 华为帐号
+
+83、创建应用时，应用包名需要和config.json文件中哪个字段保持一致？（排除B）
+A. package
+B. name
+C. bundleName
+
+84、发布应用时需要创建Profile时，类型选择什么类型？
+发布
+
+85、添加用户信息时，如果帐号使用手机号码，以下哪种输入格式正确？
+A. 86-189****1234
+
+86、一次开发多端部署的三个层次有哪些？
+A. 界面级一多
+B. 功能级一多
+C. 工程级一多
