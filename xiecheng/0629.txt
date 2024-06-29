@@ -1,0 +1,1 @@
+我详细描述一下：打开一个modal后，关闭modal，循环往复，有概率出现，modal被关闭后，mutation没有传入remove指令给modalhostview，导致实际上dialog并没有调用析构，节点树上面存在dialog，但是页面上又没有显示dialog，touch事件被dialog接收，导致页面点击无效
