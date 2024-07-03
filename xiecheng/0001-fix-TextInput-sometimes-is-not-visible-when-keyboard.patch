@@ -1,0 +1,685 @@
+From e482abc6732287f16052b3e24d5692e39bbe1787 Mon Sep 17 00:00:00 2001
+From: Arkadiusz Kasprzyk <arkadiusz.kasprzyk@swmansion.com>
+Date: Mon, 1 Jul 2024 17:46:11 +0200
+Subject: [PATCH] fix: TextInput sometimes is not visible when keyboard appears
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+## Summary
+If the distance between text input and the end of the scroll is smaller than the keyboard, then the platform doesn't adjust scroll position properly. This PR moves the responsibility of Scroll adjustment on RNOH side by adjusting position of a ScrollView nearest to the focused TextInput.
+
+## Changes
+- fixed TextInput sometimes being covered by keyboard
+
+## Test Plan
+1. Open tester app.
+2. Check KeyboardAvoidingView::`keep TextInput visible after tapping TextInput` test
+
+## Reproducer
+```tsx
+import React from 'react';
+import {View, ScrollView, TextInput, KeyboardAvoidingView} from 'react-native';
+
+const MyWebView = () => {
+  return (
+    <View
+      style={{
+        backgroundColor: 'black',
+        flex: 1,
+        height: '100%',
+        width: '100%',
+      }}>
+      <KeyboardAvoidingView behavior={'height'} style={{flex: 1}}>
+        <ScrollView
+          contentContainerStyle={{flexGrow: 1, backgroundColor: 'silver'}}>
+          <View style={{height: 600, backgroundColor: 'blue'}} />
+          <View style={{padding: 20}}>
+            <TextInput
+              style={{
+                width: '100%',
+                backgroundColor: '#CCCCCC',
+                fontSize: 20,
+                paddingHorizontal: 20,
+              }}
+              placeholder="test TextInput Holder"
+            />
+          </View>
+          <View style={{width: '100%', height: 150, backgroundColor: 'red'}} />
+          {/* height: 300 — doesn't work, height: 350 — works*/}
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </View>
+  );
+};
+
+export default MyWebView;
+```
+
+
+## Checklist
+- [x] Project compiles and the tester application works.
+
+## Issue Links
+Closes https://gl.swmansion.com/rnoh/react-native-harmony/-/issues/1126
+
+See merge request rnoh/react-native-harmony!1308
+---
+ .../Keyboard/KeyboardAvoidingView.harmony.js  | 255 ++++++++++++++++++
+ react-native-harmony/index.js                 |   2 +-
+ tester/components/Modal.tsx                   |   2 +-
+ .../ScrollViewComponentJSIBinder.h            |   1 +
+ .../ScrollViewComponentInstance.cpp           |  60 +++++
+ .../ScrollViewComponentInstance.h             |  28 ++
+ .../TextInputComponentInstance.cpp            |  40 ++-
+ .../TextInputComponentInstance.h              |  11 +-
+ .../KeyboardObserverTurboModule.ts            |   1 +
+ tester/tests/KeyboardAvoidingViewTest.tsx     |  27 ++
+ 10 files changed, 423 insertions(+), 4 deletions(-)
+ create mode 100644 react-native-harmony/Libraries/Components/Keyboard/KeyboardAvoidingView.harmony.js
+
+diff --git a/react-native-harmony/Libraries/Components/Keyboard/KeyboardAvoidingView.harmony.js b/react-native-harmony/Libraries/Components/Keyboard/KeyboardAvoidingView.harmony.js
+new file mode 100644
+index 00000000..3cc20d74
+--- /dev/null
++++ b/react-native-harmony/Libraries/Components/Keyboard/KeyboardAvoidingView.harmony.js
+@@ -0,0 +1,255 @@
++/**
++ * Copyright (c) Meta Platforms, Inc. and affiliates.
++ *
++ * This source code is licensed under the MIT license found in the
++ * LICENSE file in the root directory of this source tree.
++ *
++ * @format
++ * @flow strict-local
++ */
++
++import type {ViewStyleProp} from 'react-native/Libraries/Components/Keyboard/../../StyleSheet/StyleSheet';
++import type {
++  ViewLayout,
++  ViewLayoutEvent,
++  ViewProps,
++} from 'react-native/Libraries/Components/Keyboard/../View/ViewPropTypes';
++import type {KeyboardEvent, KeyboardMetrics} from 'react-native/Libraries/Components/Keyboard/Keyboard';
++
++import LayoutAnimation from 'react-native/Libraries/Components/Keyboard/../../LayoutAnimation/LayoutAnimation';
++import StyleSheet from 'react-native/Libraries/Components/Keyboard/../../StyleSheet/StyleSheet';
++import Platform from '../../Utilities/Platform';
++import {type EventSubscription} from 'react-native/Libraries/Components/Keyboard/../../vendor/emitter/EventEmitter';
++import AccessibilityInfo from 'react-native/Libraries/Components/Keyboard/../AccessibilityInfo/AccessibilityInfo';
++import View from 'react-native/Libraries/Components/Keyboard/../View/View';
++import Keyboard from 'react-native/Libraries/Components/Keyboard/Keyboard';
++import * as React from 'react';
++
++type Props = $ReadOnly<{|
++  ...ViewProps,
++
++  /**
++   * Specify how to react to the presence of the keyboard.
++   */
++  behavior?: ?('height' | 'position' | 'padding'),
++
++  /**
++   * Style of the content container when `behavior` is 'position'.
++   */
++  contentContainerStyle?: ?ViewStyleProp,
++
++  /**
++   * Controls whether this `KeyboardAvoidingView` instance should take effect.
++   * This is useful when more than one is on the screen. Defaults to true.
++   */
++  enabled?: ?boolean,
++
++  /**
++   * Distance between the top of the user screen and the React Native view. This
++   * may be non-zero in some cases. Defaults to 0.
++   */
++  keyboardVerticalOffset?: number,
++|}>;
++
++type State = {|
++  bottom: number,
++|};
++
++/**
++ * View that moves out of the way when the keyboard appears by automatically
++ * adjusting its height, position, or bottom padding.
++ */
++class KeyboardAvoidingView extends React.Component<Props, State> {
++  _frame: ?ViewLayout = null;
++  _keyboardEvent: ?KeyboardEvent = null;
++  _subscriptions: Array<EventSubscription> = [];
++  viewRef: {current: React.ElementRef<typeof View> | null, ...};
++  _initialFrameHeight: number = 0;
++
++  constructor(props: Props) {
++    super(props);
++    this.state = {bottom: 0};
++    this.viewRef = React.createRef();
++  }
++
++  async _relativeKeyboardHeight(
++    keyboardFrame: KeyboardMetrics,
++  ): Promise<number> {
++    const frame = this._frame;
++    if (!frame || !keyboardFrame) {
++      return 0;
++    }
++
++    // On iOS when Prefer Cross-Fade Transitions is enabled, the keyboard position
++    // & height is reported differently (0 instead of Y position value matching height of frame)
++    if (
++      Platform.OS === 'ios' &&
++      keyboardFrame.screenY === 0 &&
++      (await AccessibilityInfo.prefersCrossFadeTransitions())
++    ) {
++      return 0;
++    }
++
++    const keyboardY =
++      keyboardFrame.screenY - (this.props.keyboardVerticalOffset ?? 0);
++
++    if (this.props.behavior === 'height') {
++      return Math.max(
++        this.state.bottom + frame.y + frame.height - keyboardY,
++        0,
++      );
++    }
++
++    // Calculate the displacement needed for the view such that it
++    // no longer overlaps with the keyboard
++    return Math.max(frame.y + frame.height - keyboardY, 0);
++  }
++
++  _onKeyboardChange = (event: ?KeyboardEvent) => {
++    this._keyboardEvent = event;
++    // $FlowFixMe[unused-promise]
++    this._updateBottomIfNecessary();
++  };
++
++  _onLayout = async (event: ViewLayoutEvent) => {
++    const wasFrameNull = this._frame == null;
++    this._frame = event.nativeEvent.layout;
++    if (!this._initialFrameHeight) {
++      // save the initial frame height, before the keyboard is visible
++      this._initialFrameHeight = this._frame.height;
++    }
++
++    if (wasFrameNull) {
++      await this._updateBottomIfNecessary();
++    }
++
++    if (this.props.onLayout) {
++      this.props.onLayout(event);
++    }
++  };
++
++  _updateBottomIfNecessary = async () => {
++    if (this._keyboardEvent == null) {
++      this.setState({bottom: 0});
++      return;
++    }
++
++    const {duration, easing, endCoordinates} = this._keyboardEvent;
++    const height = await this._relativeKeyboardHeight(endCoordinates);
++
++    if (this.state.bottom === height) {
++      return;
++    }
++
++    if (duration && easing) {
++      LayoutAnimation.configureNext({
++        // We have to pass the duration equal to minimal accepted duration defined here: RCTLayoutAnimation.m
++        duration: duration > 10 ? duration : 10,
++        update: {
++          duration: duration > 10 ? duration : 10,
++          type: LayoutAnimation.Types[easing] || 'keyboard',
++        },
++      });
++    }
++    this.setState({bottom: height});
++  };
++
++  componentDidMount(): void {
++    if (Platform.OS === 'ios') {
++      this._subscriptions = [
++        Keyboard.addListener('keyboardWillChangeFrame', this._onKeyboardChange),
++      ];
++    } else {
++      this._subscriptions = [
++        Keyboard.addListener('keyboardDidHide', this._onKeyboardChange),
++        Keyboard.addListener('keyboardDidShow', this._onKeyboardChange),
++      ];
++    }
++  }
++
++  componentWillUnmount(): void {
++    this._subscriptions.forEach(subscription => {
++      subscription.remove();
++    });
++  }
++
++  render(): React.Node {
++    const {
++      behavior,
++      children,
++      contentContainerStyle,
++      enabled = true,
++      // eslint-disable-next-line no-unused-vars
++      keyboardVerticalOffset = 0,
++      style,
++      onLayout,
++      ...props
++    } = this.props;
++    const bottomHeight = enabled === true ? this.state.bottom : 0;
++    switch (behavior) {
++      case 'height':
++        let heightStyle;
++        if (this._frame != null && this.state.bottom > 0) {
++          // Note that we only apply a height change when there is keyboard present,
++          // i.e. this.state.bottom is greater than 0. If we remove that condition,
++          // this.frame.height will never go back to its original value.
++          // When height changes, we need to disable flex.
++          heightStyle = {
++            height: this._initialFrameHeight - bottomHeight,
++            flex: 0,
++          };
++        }
++        /* RNOH: patch */
++        return (
++          <View
++            ref={this.viewRef}
++            style={StyleSheet.compose(style, heightStyle)}
++            onLayout={this._onLayout}
++            {...props}>
++            {React.Children.map(children, child => React.cloneElement(child, {__keyboardAvoidingViewBottomHeight: bottomHeight}))}
++          </View>
++        );
++
++      case 'position':
++        return (
++          <View
++            ref={this.viewRef}
++            style={style}
++            onLayout={this._onLayout}
++            {...props}>
++            <View
++              style={StyleSheet.compose(contentContainerStyle, {
++                bottom: bottomHeight,
++              })}>
++              {children}
++            </View>
++          </View>
++        );
++
++      case 'padding':
++        /* RNOH: patch */
++        return (
++          <View
++            ref={this.viewRef}
++            style={StyleSheet.compose(style, {paddingBottom: bottomHeight})}
++            onLayout={this._onLayout}
++            {...props}>
++            {React.Children.map(children, child => React.cloneElement(child, {__keyboardAvoidingViewBottomHeight: bottomHeight}))}
++          </View>
++        );
++
++      default:
++        return (
++          <View
++            ref={this.viewRef}
++            onLayout={this._onLayout}
++            style={style}
++            {...props}>
++            {children}
++          </View>
++        );
++    }
++  }
++}
++
++export default KeyboardAvoidingView;
+diff --git a/react-native-harmony/index.js b/react-native-harmony/index.js
+index e852eb93..c2f1a5ca 100644
+--- a/react-native-harmony/index.js
++++ b/react-native-harmony/index.js
+@@ -76,7 +76,7 @@ module.exports = {
+     return require('react-native/Libraries/Components/Keyboard/Keyboard');
+   },
+   get KeyboardAvoidingView() {
+-    return require('react-native/Libraries/Components/Keyboard/KeyboardAvoidingView')
++    return require('./Libraries/Components/Keyboard/KeyboardAvoidingView')
+       .default;
+   },
+   get NativeEventEmitter() {
+diff --git a/tester/components/Modal.tsx b/tester/components/Modal.tsx
+index bf5af6da..f659ffa7 100644
+--- a/tester/components/Modal.tsx
++++ b/tester/components/Modal.tsx
+@@ -35,7 +35,7 @@ export function Modal(props: {
+         ]}>
+         <View
+           style={[
+-            {backgroundColor: 'white', padding: 16},
++            {backgroundColor: 'white', padding: 0},
+             props.contentContainerStyle,
+           ]}
+           onTouchEnd={e => e.stopPropagation()}>
+diff --git a/tester/harmony/react_native_openharmony/src/main/cpp/RNOHCorePackage/ComponentBinders/ScrollViewComponentJSIBinder.h b/tester/harmony/react_native_openharmony/src/main/cpp/RNOHCorePackage/ComponentBinders/ScrollViewComponentJSIBinder.h
+index 848f5506..cadfe924 100644
+--- a/tester/harmony/react_native_openharmony/src/main/cpp/RNOHCorePackage/ComponentBinders/ScrollViewComponentJSIBinder.h
++++ b/tester/harmony/react_native_openharmony/src/main/cpp/RNOHCorePackage/ComponentBinders/ScrollViewComponentJSIBinder.h
+@@ -30,6 +30,7 @@ class ScrollViewComponentJSIBinder : public ViewComponentJSIBinder {
+     object.setProperty(rt, "maintainVisibleContentPosition", "Object");
+     object.setProperty(rt, "scrollToOverflowEnabled", "boolean");
+     object.setProperty(rt, "centerContent", "boolean");
++    object.setProperty(rt, "__keyboardAvoidingViewBottomHeight", true);
+     return object;
+   }
+ 
+diff --git a/tester/harmony/react_native_openharmony/src/main/cpp/RNOHCorePackage/ComponentInstances/ScrollViewComponentInstance.cpp b/tester/harmony/react_native_openharmony/src/main/cpp/RNOHCorePackage/ComponentInstances/ScrollViewComponentInstance.cpp
+index 3349fdee..3cff6218 100644
+--- a/tester/harmony/react_native_openharmony/src/main/cpp/RNOHCorePackage/ComponentInstances/ScrollViewComponentInstance.cpp
++++ b/tester/harmony/react_native_openharmony/src/main/cpp/RNOHCorePackage/ComponentInstances/ScrollViewComponentInstance.cpp
+@@ -241,6 +241,30 @@ void rnoh::ScrollViewComponentInstance::onPropsChanged(
+     SharedConcreteProps const& props) {
+   CppComponentInstance::onPropsChanged(props);
+ 
++  /**
++   * This block is needed to detects which batch of mutations were triggered by
++   * appearance of the keyboard.
++   * "__keyboardAvoidingViewBottomHeight" is injected by KeyboardAvoidingView.
++   * ScrollView needs to be placed directly inside KeyboardAvoidingView.
++   */
++  double parentKeyboardAvoidingViewBottomHeight = 0;
++  if (props->rawProps.count("__keyboardAvoidingViewBottomHeight") > 0) {
++    parentKeyboardAvoidingViewBottomHeight =
++        props->rawProps["__keyboardAvoidingViewBottomHeight"].asDouble();
++  }
++  double prevParentKeyboardAvoidingViewBottomHeight = 0;
++  if (m_props != nullptr &&
++      m_props->rawProps["__keyboardAvoidingViewBottomHeight"] > 0) {
++    prevParentKeyboardAvoidingViewBottomHeight =
++        m_props->rawProps["__keyboardAvoidingViewBottomHeight"].asDouble();
++  }
++  auto keyboardAvoider = m_keyboardAvoider.lock();
++  if (keyboardAvoider && parentKeyboardAvoidingViewBottomHeight > 0 &&
++      parentKeyboardAvoidingViewBottomHeight !=
++          prevParentKeyboardAvoidingViewBottomHeight) {
++    m_shouldAdjustScrollPositionOnNextRender = true;
++  }
++
+   if (props->rawProps.count("persistentScrollbar") > 0) {
+     m_persistentScrollbar = props->rawProps["persistentScrollbar"].asBool();
+   }
+@@ -473,6 +497,36 @@ void ScrollViewComponentInstance::onFinalizeUpdates() {
+       contentContainer->updateClippedSubviews();
+     }
+   }
++
++  if (m_shouldAdjustScrollPositionOnNextRender) {
++    auto maybeKeyboardAvoider = m_keyboardAvoider.lock();
++    if (maybeKeyboardAvoider != nullptr) {
++      auto keyboardAvoider =
++          std::dynamic_pointer_cast<KeyboardAvoider>(maybeKeyboardAvoider);
++      if (keyboardAvoider != nullptr) {
++        auto scrollOffset =
++            keyboardAvoider->getBottomEdgeOffsetRelativeToScrollView(
++                std::dynamic_pointer_cast<ScrollViewComponentInstance>(
++                    this->shared_from_this()));
++        auto newScrollOffset = scrollOffset - m_layoutMetrics.frame.size.height;
++        if (isHorizontal(m_props)) {
++          if (newScrollOffset > m_scrollNode.getScrollOffset().x) {
++            m_scrollNode.scrollTo(
++                newScrollOffset, m_scrollNode.getScrollOffset().y, true);
++          }
++        } else {
++          if (newScrollOffset > m_scrollNode.getScrollOffset().y) {
++            LOG(INFO)
++                << "Adjusting scroll position to prevent keyboard avoider being hidden by the keyboard";
++            m_scrollNode.scrollTo(
++                m_scrollNode.getScrollOffset().x, newScrollOffset, true);
++          }
++        }
++        m_keyboardAvoider.reset();
++      }
++    }
++    m_shouldAdjustScrollPositionOnNextRender = false;
++  }
+ }
+ 
+ folly::dynamic ScrollViewComponentInstance::getScrollEventPayload(
+@@ -703,4 +757,10 @@ void ScrollViewComponentInstance::onAppear() {
+   }
+ }
+ 
++bool ScrollViewComponentInstance::setKeyboardAvoider(
++    ComponentInstance::Weak keyboardAvoidingComponentInstance) {
++  m_keyboardAvoider = keyboardAvoidingComponentInstance;
++  return true;
++}
++
+ } // namespace rnoh
+diff --git a/tester/harmony/react_native_openharmony/src/main/cpp/RNOHCorePackage/ComponentInstances/ScrollViewComponentInstance.h b/tester/harmony/react_native_openharmony/src/main/cpp/RNOHCorePackage/ComponentInstances/ScrollViewComponentInstance.h
+index 9ddec923..7dd8caa4 100644
+--- a/tester/harmony/react_native_openharmony/src/main/cpp/RNOHCorePackage/ComponentInstances/ScrollViewComponentInstance.h
++++ b/tester/harmony/react_native_openharmony/src/main/cpp/RNOHCorePackage/ComponentInstances/ScrollViewComponentInstance.h
+@@ -108,6 +108,29 @@ class SettlingScrollViewInternalState : public ScrollViewInternalState {
+ 
+ // —————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
+ 
++/**
++ * HACK: This interface is needed for adjusting scroll position when keyboard
++ * appears. It is meant to be implemented by ComponentInstances that can trigger
++ * keyboard visibility e.g. TextInput.
++ *
++ * Adjusting the scroll position when the keyboard appears is the
++ * responsibility of the platform. However, the platform doesn't adjust the
++ * position correctly when a ScrollView changes its dimensions right after
++ * the platform starts adjusting the position. To fix this problem, this hack
++ * checks for changes in "__keyboardAvoidingViewBottomHeight" to detect
++ * mutations triggered by the keyboard appearance.
++ *
++ * "__keyboardAvoidingViewBottomHeight" is injected by KeyboardAvoidingView.
++ * ScrollView needs to be placed directly inside KeyboardAvoidingView.
++ */
++class KeyboardAvoider {
++ public:
++  using Weak = std::weak_ptr<KeyboardAvoider>;
++
++  virtual facebook::react::Float getBottomEdgeOffsetRelativeToScrollView(
++      std::shared_ptr<ScrollViewComponentInstance> scrollView) = 0;
++};
++
+ class ScrollViewComponentInstance
+     : public CppComponentInstance<facebook::react::ScrollViewShadowNode>,
+       public ScrollNodeDelegate {
+@@ -133,6 +156,7 @@ class ScrollViewComponentInstance
+   bool m_disableIntervalMomentum = false;
+   bool m_movedBySignificantOffset = false;
+   float m_recentScrollFrameOffset = 0;
++  bool m_shouldAdjustScrollPositionOnNextRender = false;
+   std::vector<facebook::react::Float> m_snapToOffsets = {};
+   std::optional<ChildTagWithOffset> m_firstVisibleView = std::nullopt;
+   /**
+@@ -225,6 +249,9 @@ class ScrollViewComponentInstance
+ 
+   bool isHandlingTouches() const override;
+ 
++  bool setKeyboardAvoider(
++      ComponentInstance::Weak keyboardAvoidingComponentInstance);
++
+  protected:
+   void onNativeResponderBlockChange(bool isBlocked) override;
+ 
+@@ -233,5 +260,6 @@ class ScrollViewComponentInstance
+   bool isContentSmallerThanContainer();
+   bool isAtEnd(facebook::react::Point currentOffset);
+   facebook::react::Point getContentViewOffset() const;
++  ComponentInstance::Weak m_keyboardAvoider;
+ };
+ } // namespace rnoh
+\ No newline at end of file
+diff --git a/tester/harmony/react_native_openharmony/src/main/cpp/RNOHCorePackage/ComponentInstances/TextInputComponentInstance.cpp b/tester/harmony/react_native_openharmony/src/main/cpp/RNOHCorePackage/ComponentInstances/TextInputComponentInstance.cpp
+index 804a0f73..7c11088c 100644
+--- a/tester/harmony/react_native_openharmony/src/main/cpp/RNOHCorePackage/ComponentInstances/TextInputComponentInstance.cpp
++++ b/tester/harmony/react_native_openharmony/src/main/cpp/RNOHCorePackage/ComponentInstances/TextInputComponentInstance.cpp
+@@ -10,11 +10,13 @@
+ #include <react/renderer/core/ConcreteState.h>
+ #include <sstream>
+ #include <utility>
++#include "ScrollViewComponentInstance.h"
+ 
+ namespace rnoh {
+ 
+ TextInputComponentInstance::TextInputComponentInstance(Context context)
+-    : CppComponentInstance(std::move(context)) {
++    : CppComponentInstance(std::move(context)),
++      ArkTSMessageHub::Observer(m_deps->arkTSMessageHub) {
+   m_textInputNode.setTextInputNodeDelegate(this);
+   m_textAreaNode.setTextAreaNodeDelegate(this);
+ }
+@@ -349,4 +351,40 @@ void TextInputComponentInstance::blur() {
+   getLocalRootArkUINode().setFocusStatus(0);
+ }
+ 
++void TextInputComponentInstance::onMessageReceived(
++    const ArkTSMessage& message) {
++  if (message.name == "KEYBOARD_VISIBLE" && this->m_focused) {
++    auto parent = this->m_parent.lock();
++    std::shared_ptr<ScrollViewComponentInstance> scrollView = nullptr;
++    while (parent != nullptr) {
++      scrollView =
++          std::dynamic_pointer_cast<ScrollViewComponentInstance>(parent);
++      if (scrollView != nullptr) {
++        scrollView->setKeyboardAvoider(shared_from_this());
++        break;
++      }
++      parent = parent->getParent().lock();
++    }
++  }
++}
++
++// KeyboardAvoider
++facebook::react::Float
++TextInputComponentInstance::getBottomEdgeOffsetRelativeToScrollView(
++    std::shared_ptr<ScrollViewComponentInstance> scrollView) {
++  auto relativePos = m_layoutMetrics.frame.origin;
++  auto parent = m_parent.lock();
++  while (parent != nullptr && parent->getTag() != scrollView->getTag()) {
++    relativePos += parent->getLayoutMetrics().frame.origin;
++    parent = parent->getParent().lock();
++  }
++  /**
++   * It looks like 24 is used by the platform when KeyboardAvoider hack isn't
++   * needed.
++   */
++  auto GAP_BETWEEN_KEYBOARD_AND_TEXT_INPUT = 24;
++  return relativePos.y + m_layoutMetrics.frame.size.height +
++      GAP_BETWEEN_KEYBOARD_AND_TEXT_INPUT;
++}
++
+ } // namespace rnoh
+diff --git a/tester/harmony/react_native_openharmony/src/main/cpp/RNOHCorePackage/ComponentInstances/TextInputComponentInstance.h b/tester/harmony/react_native_openharmony/src/main/cpp/RNOHCorePackage/ComponentInstances/TextInputComponentInstance.h
+index 2ca7600a..95f7a071 100644
+--- a/tester/harmony/react_native_openharmony/src/main/cpp/RNOHCorePackage/ComponentInstances/TextInputComponentInstance.h
++++ b/tester/harmony/react_native_openharmony/src/main/cpp/RNOHCorePackage/ComponentInstances/TextInputComponentInstance.h
+@@ -3,6 +3,7 @@
+ #include "RNOH/CppComponentInstance.h"
+ #include "RNOH/arkui/TextAreaNode.h"
+ #include "RNOH/arkui/TextInputNode.h"
++#include "ScrollViewComponentInstance.h"
+ #include "react/renderer/components/textinput/TextInputEventEmitter.h"
+ #include "react/renderer/components/textinput/TextInputShadowNode.h"
+ 
+@@ -10,7 +11,9 @@ namespace rnoh {
+ class TextInputComponentInstance
+     : public CppComponentInstance<facebook::react::TextInputShadowNode>,
+       public TextInputNodeDelegate,
+-      public TextAreaNodeDelegate {
++      public TextAreaNodeDelegate,
++      public ArkTSMessageHub::Observer,
++      public KeyboardAvoider {
+  private:
+   TextInputNode m_textInputNode;
+   TextAreaNode m_textAreaNode;
+@@ -67,5 +70,11 @@ class TextInputComponentInstance
+   void onTextSelectionChange(int32_t location, int32_t length) override;
+ 
+   ArkUINode& getLocalRootArkUINode() override;
++
++  void onMessageReceived(ArkTSMessage const& message) override;
++
++  // KeyboardAvoider
++  facebook::react::Float getBottomEdgeOffsetRelativeToScrollView(
++      std::shared_ptr<ScrollViewComponentInstance> scrollView) override;
+ };
+ } // namespace rnoh
+\ No newline at end of file
+diff --git a/tester/harmony/react_native_openharmony/src/main/ets/RNOHCorePackage/turboModules/KeyboardObserverTurboModule.ts b/tester/harmony/react_native_openharmony/src/main/ets/RNOHCorePackage/turboModules/KeyboardObserverTurboModule.ts
+index 22e7fae3..4033cdcd 100644
+--- a/tester/harmony/react_native_openharmony/src/main/ets/RNOHCorePackage/turboModules/KeyboardObserverTurboModule.ts
++++ b/tester/harmony/react_native_openharmony/src/main/ets/RNOHCorePackage/turboModules/KeyboardObserverTurboModule.ts
+@@ -32,6 +32,7 @@ export class KeyboardObserverTurboModule extends TurboModule {
+       if (keyboardHeight > 0) {
+         const keyboardAvoidArea = windowInstance.getWindowAvoidArea(window.AvoidAreaType.TYPE_KEYBOARD).bottomRect;
+         this.ctx.rnInstance.emitDeviceEvent('keyboardDidShow', this.createKeyboardEvent(keyboardAvoidArea.left, keyboardAvoidArea.top, keyboardAvoidArea.width, keyboardAvoidArea.height));
++        this.ctx.rnInstance.postMessageToCpp("KEYBOARD_VISIBLE", {keyboardHeight: px2vp(keyboardAvoidArea.height)});
+       } else {
+         const windowRect = windowInstance.getWindowProperties().windowRect;
+         this.ctx.rnInstance.emitDeviceEvent('keyboardDidHide', this.createKeyboardEvent(0, windowRect.height, windowRect.width, 0))
+diff --git a/tester/tests/KeyboardAvoidingViewTest.tsx b/tester/tests/KeyboardAvoidingViewTest.tsx
+index 34edbea2..d34cc546 100644
+--- a/tester/tests/KeyboardAvoidingViewTest.tsx
++++ b/tester/tests/KeyboardAvoidingViewTest.tsx
+@@ -1,6 +1,8 @@
+ import {
++  Dimensions,
+   Keyboard,
+   KeyboardAvoidingView,
++  ScrollView,
+   StyleProp,
+   StyleSheet,
+   TextInput,
+@@ -11,6 +13,7 @@ import {
+ import {TestSuite} from '@rnoh/testerino';
+ import React from 'react';
+ import {Modal, TestCase} from '../components';
++import {PALETTE} from '../components/palette';
+ 
+ export const KeyboardAvoidingViewTest = () => {
+   return (
+@@ -42,6 +45,30 @@ export const KeyboardAvoidingViewTest = () => {
+           justifyContent="flex-end"
+         />
+       </TestCase.Example>
++      <TestCase.Example itShould="keep TextInput visible after tapping TextInput">
++        <Modal contentContainerStyle={{height: '100%', width: '50%'}}>
++          <KeyboardAvoidingView behavior={'height'}>
++            <ScrollView>
++              <View
++                style={{
++                  height: Dimensions.get('window').height - 128,
++                  backgroundColor: 'silver',
++                }}
++              />
++              <TextInput
++                style={{
++                  width: '100%',
++                  backgroundColor: PALETTE.REACT_CYAN_LIGHT,
++                  paddingHorizontal: 8,
++                  paddingVertical: 16,
++                  marginBottom: 64,
++                }}
++                placeholder="CLICK ME"
++              />
++            </ScrollView>
++          </KeyboardAvoidingView>
++        </Modal>
++      </TestCase.Example>
+     </TestSuite>
+   );
+ };
+-- 
+2.44.0.windows.1
+
