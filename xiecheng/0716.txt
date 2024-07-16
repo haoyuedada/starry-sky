@@ -1,0 +1,35 @@
+问题：【VMallRNBPHarmony 1.24.5.300】【0527RN-SDK】【商详弹框】折叠屏折叠态，打开商详已选/优惠等弹框，会闪动一下， 必现， 影响用户体验。
+
+相关发现：
+在exitTransition.delay为0时，动画效果不生效（弹窗即刻出现），exitTransition.delay大于0时，动画正常显示。
+
+相关代码：
+React.useEffect(
+      function startExitTransition() {
+        const exitTransition = {
+          ...defaultTransitionConfig,
+          ...exit?.transition,
+        };
+
+        if (animationState === 'exiting') {
+          Animated.sequence([
+            // @ts-ignore - delay is present in defaultTransitionConfig
+            Animated.delay(exitTransition.delay),
+            Animated[exitTransition.type ?? 'd'](animateValue, {
+              toValue: 0,
+              useNativeDriver: true,
+              ...exitTransition,
+            }),
+          ]).start(() => {
+            setAnimationState('exited');
+          });
+        }
+      },
+      [
+        exit,
+        onTransitionComplete,
+        setAnimationState,
+        animationState,
+        animateValue,
+      ]
+    );
