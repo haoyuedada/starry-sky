@@ -1,0 +1,17 @@
+            <Animated.View style={{
+              height: 69,
+              justifyContent: 'center',
+              alignItems: 'center',
+              backgroundColor: "green",
+              // transform: [
+              //   {
+              //     scale: scaleValue.interpolate({
+              //       inputRange: [0, 1, 2],
+              //       outputRange: [0.1, 1.2, 1.2],
+              //     }),
+              //   },
+              // ],
+              transform: [{ scale: scaleValue }],
+            }}>
+              <Image source={require("../../../assets/call.png")} style={{ width: 20, height: 20 }}></Image>
+            </Animated.View>
