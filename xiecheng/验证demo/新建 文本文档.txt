@@ -1,0 +1,48 @@
+92	P1	"harmony rn中使用pointerEvents=""box-none""会响应子组建的触摸 
+但是不会响应父组建的触摸。但是目前现状是该属性会导致子组建
+被穿透触摸。理论上该属性是为了让父组建被穿透触摸。
+（该问题已在0.74.1fabric android侧试过没有问题）"	7月8日	待验证	RN	陈皓月	0711: 已修复，已经与yiwen确认。				"import React from 'react';
+import {
+  Text,
+  View,
+  TouchableOpacity,
+  Button,
+  ScrollView,
+  Dimensions,
+  Animated,
+} from 'react-native';
+const App = () => {
+  return (
+    <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+      <ScrollView>
+        {Array.from({length: 100}).map((_, index) => (
+          <View
+            style={{
+              height: 40,
+              width: Dimensions.get('window').width - 20,
+              marginTop: 30,
+              backgroundColor: 'pink',
+            }}>
+            <Text>{index}</Text>
+          </View>
+        ))}
+      </ScrollView>
+      <Animated.View
+        pointerEvents={'box-none'}
+        style={{
+          bottom: 0,
+          left: 0,
+          right: 0,
+          zIndex: 101,
+          position: 'absolute',
+          height: 300,
+          width: Dimensions.get('screen').width,
+          backgroundColor: 'orange',
+        }}>
+        <View
+          style={{width: 200, height: 200, backgroundColor: 'green'}}></View>
+      </Animated.View>
+    </View>
+  );
+};
+export default App;"	

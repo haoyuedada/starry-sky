@@ -1,0 +1,3 @@
+13	P1	鸿蒙端setState渲染问题：连续多次setState会第一次渲染很慢，对应表现首屏很慢出现	7月23日	待验证	RN	陈皓月	"0711：携程集成RN SDK后，在携程环境试下。
+0709：跟React 18状态更新批处理有关，可以将RNInstanceRegistry.ts中concurrentRoot设置为false禁用React 18特性。
+0625：待分析"					

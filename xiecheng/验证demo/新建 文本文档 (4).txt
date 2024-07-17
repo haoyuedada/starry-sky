@@ -1,0 +1,100 @@
+60	P1	harmony中获取滚动距离存在延时 将导致动画卡顿和错乱情况	7月23日	待验证	RN	陈皓月	"0711：待验证
+0709：待确认场景"				"import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import {Animated, ScrollView, Text, View} from 'react-native';
+
+const App = () => {
+  const rootScrollViewRef = useRef(null);
+  const AnimatedScrollY = useMemo(() => {
+    return new Animated.Value(0);
+  }, []);
+  const [position, setPosition] = useState({x: 0, y: 0});
+  const testPositionRef = useRef(null);
+  // 显示隐藏 tabBar
+  useEffect(() => {
+    const linstenr = AnimatedScrollY.addListener(e => {
+      testPositionRef?.current?.measure((fx, fy, width, height, px, py) => {
+        console.log(py, px, '蓝色块位置');
+        setPosition({x: px, y: py});
+      });
+      // console.log(e.value,'pppppp-AnimatedScrollY')
+    });
+    return () => {
+      AnimatedScrollY.removeListener(linstenr);
+    };
+  }, [AnimatedScrollY]);
+
+  const scrollToElement = useCallback(() => {
+    setTimeout(() => {
+      let target = testPositionRef.current;
+      const rootScrollViewNode = rootScrollViewRef.current;
+      target?.measureLayout?.(
+        rootScrollViewNode,
+        (fx, fy, width, height, px, py) => {
+          if (rootScrollViewRef.current) {
+            rootScrollViewRef.current.scrollTo({
+              y: fy,
+              duration: 500,
+            });
+          }
+        },
+      );
+    }, 20);
+  }, []);
+  return (
+    <View>
+      <View style={{height: 20, marginTop: 100, alignItems: 'center'}}>
+        <Text>测试demo</Text>
+      </View>
+      <View
+        style={{
+          width: 100,
+          height: 20,
+          backgroundColor: '#fff',
+          position: 'relative',
+        }}>
+        <Text
+          style={{fontSize: 12, color: '#fff', backgroundColor: 'blue'}}
+          onPress={() => {
+            scrollToElement();
+          }}>
+          点击滚动蓝色块
+        </Text>
+      </View>
+      <View>
+        <Text>
+          蓝色块的位置：x={position.x}, y={position.y}
+        </Text>
+      </View>
+      <ScrollView
+        ref={rootScrollViewRef}
+        scrollEventThrottle={18}
+        onScroll={Animated.event(
+          [{nativeEvent: {contentOffset: {y: AnimatedScrollY}}}],
+          {
+            useNativeDriver: false,
+          },
+        )}>
+        <View
+          style={{
+            height: 2000,
+            width: '100%',
+            backgroundColor: 'red',
+            position: 'relative',
+          }}>
+          <View
+            style={{
+              backgroundColor: 'blue',
+              height: 100,
+              width: 100,
+              top: 200,
+              position: 'relative',
+            }}
+            ref={testPositionRef}></View>
+        </View>
+      </ScrollView>
+    </View>
+  );
+};
+
+export default App;
+"	

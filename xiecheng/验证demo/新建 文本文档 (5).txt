@@ -1,0 +1,2 @@
+47	P1	animated.loop循环动画设置 useNativeDriver:true 动画只会执行一次，ios上会循环执行	7月23日	待验证	RN	陈皓月	"0711：待验证
+0605：和useNativeDriver相关"	useNativeDriver设置为false，就没问题				
