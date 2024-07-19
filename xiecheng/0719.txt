@@ -1,0 +1,30 @@
+简要描述 :
+【RN框架】react-native-harmony文字布局渲染有bug，文字容器设为flexWrap: 'wrap'，改变文字本身的样式，会导致文字超出容器框。
+详细描述 :
+【被测版本信息】
+
+
+
+RN框架版本号：
+
+react-native-harmony-0.72.27
+
+
+
+【被测版本信息】
+
+
+
+IDE安装环境: win10安全PC
+
+SDK版本： HarmonyOS NEXT Developer Beta1
+
+手机OS版本： 3.0.025
+
+
+
+【问题发现过程】
+
+
+
+发现开发的库文字显示异常，找到对应组件后，做测试，发现是文字渲染导致。
