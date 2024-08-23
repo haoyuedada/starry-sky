@@ -1,0 +1,18 @@
+<View style={{height: 80}}>
+          <SafeAreaView 
+            style={{
+              position: 'absolute',
+              fontSize: 16,
+              backgroundColor: '#eeeeee',
+              borderColor: '#666666',
+              borderWidth: 5,
+              borderTopWidth: 20,
+              borderRadius: 10,
+              padding: 10,
+              paddingTop: 20,
+            }}
+            testID="safeAreaView_test_ID"
+            >
+            <Text>Placeholder defines intrinsic size</Text>
+            </SafeAreaView >
+        </View>
