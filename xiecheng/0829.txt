@@ -1,0 +1,6 @@
+hello，我是rn团队，麻烦请将如下变更通知到您负责的应用相关开发团队，如有反馈，请告知我已通知的应用名称。如果伙伴有对变更的反馈意见也请告知给我。
+
+升级到RNOH 5.0.0.500及以上版本，halfLeading居中特性发生变更：
+
+变更影响：
+当未在metadata中配置half_leading或者配置为false时，设置了lineHeight属性的Text组件文字上下居中位置发生变更： 之前的版本中，lineHeight属性不会影响halfLeading居中特性。 升级到RNOH 5.0.0.500及以上版本，Text组件在设置lineHeight属性时，halfLeading居中特性会强制视为开启。
