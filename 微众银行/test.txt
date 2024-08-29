@@ -1,0 +1,15 @@
+  doAsyncJob(shouldResolve: boolean): Promise<object> {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        if (shouldResolve) {
+          let obj:haha = { code: '404', message: 'haha'}
+          // resolve(obj);
+          resolve('resolve message');
+        } else {
+          // let obj:haha = { code: '401', message: 'haha1'}
+          // reject(obj);
+          reject('reject message');
+        }
+      }, 100);
+    });
+  }
