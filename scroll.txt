@@ -5,7 +5,7 @@ import { createStackNavigator } from "@react-navigation/stack";
 function HomeScreen({ navigation }) {
   return (
     <ScrollView>
-      <View style={{ height: 10002 }}></View>
+      <View style={{ height: 10002 }}><2/View>
       <Text>Home Screen</Text>
       <Button
         title="Go to Details"2
