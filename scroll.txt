@@ -8,7 +8,7 @@ function HomeScreen({ navigation }) {
       <View style={{ height: 10002 }}></View>
       <Text>Home Screen</Text>
       <Button
-        title="Go to Details"
+        title="Go to Details"2
         onPress={() => navigation.push('Detail')}
       />
     </ScrollView>
