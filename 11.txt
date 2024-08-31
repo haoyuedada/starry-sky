@@ -1,0 +1,70 @@
+import React from 'react';
+import { View, Text, StyleSheet } from 'react-native';
+
+class App extends React.Component<any, any> {
+  renderTag = () => {
+    return (
+      <>
+        <View
+          style={[
+            style.prdTag,
+            { backgroundColor: '#FA3040' },
+            {
+              transform: [{ translateY: 1 }],
+            },
+          ]}
+        >
+          <Text numberOfLines={1} style={[style.prdTagText, { color: '#fff' }]} ellipsizeMode={'clip'}>
+            超级秒杀
+          </Text>
+        </View>
+        <Text>&nbsp;</Text>
+      </>
+    );
+  };
+
+  render(): React.ReactNode {
+    const prdName = '香百年智能离子净化香氛机（XH-009)汽车车载香薰';
+    return (
+      <View style={{ marginTop: 38, marginLeft: 16, width: 166, height: 200, borderColor: 'pink', borderWidth: 1 }}>
+        <Text style={[style.prdName]} numberOfLines={2} ellipsizeMode={'tail'}>
+          {this.renderTag()}
+          {prdName}
+        </Text>
+      </View>
+    );
+  }
+}
+
+const style = StyleSheet.create({
+  prdName: {
+    // fontSize: 13,
+    // justifyContent: 'center',
+    // height: 18,
+    // lineHeight: 18,
+  },
+  prdTag: {
+    borderRadius: 4,
+    maxWidth: 116,
+    paddingLeft: 2,
+    paddingRight: 2,
+    paddingTop: 0.5,
+    paddingBottom: 1,
+    height: 14,
+    marginRight: 4,
+    textAlign: 'center',
+    textAlignVertical: 'center',
+    alignItems: 'center',
+    marginTop: -2,
+    overflow: 'hidden',
+  },
+  prdTagText: {
+    color: '#fff',
+    fontSize: 10,
+    lineHeight: 14,
+    width: '100%',
+    overflow: 'hidden',
+  },
+});
+
+export default App;

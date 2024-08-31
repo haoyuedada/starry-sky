@@ -34,7 +34,7 @@ export function CHYCookie(): JSX.Element {
 
     return (
         <SafeAreaView>
-            <View>
+            <View style={{Headers: '34', asfa: 23}}>
                 <Text>23234sdfghjkl3456789dfghjkldfghjkfghjkl</Text>
             </View>
         </SafeAreaView>
