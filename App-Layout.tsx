@@ -6,7 +6,7 @@ import {
   StyleSheet,
   Button,
   SafeAreaView,
-} from 'react-native';2
+} from 'react-native';22
 
 class App extends Component {
   // fadeAnim will be used as the value for opacity. Initial Value: 0
