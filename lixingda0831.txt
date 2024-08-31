@@ -1,0 +1,137 @@
+import React from 'react';
+import { View, Text, StyleSheet, Pressable } from 'react-native';
+
+class TagComp extends React.Component<any, any> {
+  constructor(props) {
+    super(props);
+    console.log('cw TagComp constructor');
+  }
+  renderTag = () => {
+    return (
+      <>
+        <View
+          style={[
+            style.prdTag,
+            { backgroundColor: '#FA3040', margin: 0.167 },
+            {
+              transform: [{ translateY: 2.5 }],
+            },
+          ]}
+        >
+          <Text numberOfLines={1} style={[style.prdTagText, { color: '#fff' }]} ellipsizeMode={'clip'}>
+            超级秒杀
+          </Text>
+        </View>
+        <Text>&nbsp;</Text>
+      </>
+    );
+  };
+
+  render(): React.ReactNode {
+    return (
+      <View
+        style={{
+          marginTop: 38,
+          marginLeft: 16,
+          width: this.props.textWidth,
+          height: 200,
+          borderColor: 'pink',
+          borderWidth: 1,
+        }}
+      >
+        <Text style={[style.prdName]} numberOfLines={2} ellipsizeMode={'tail'}>
+          {this.renderTag()}
+          {this.props.prdName}
+        </Text>
+      </View>
+    );
+  }
+}
+class App extends React.Component<any, any> {
+  constructor(props) {
+    super(props);
+    this.state = {
+      textWidth: 167,
+      prdName: '香百年智能离子净化香氛机（XH-009)汽车车载香薰',
+      randomKey: 0,
+    };
+  }
+
+  render(): React.ReactNode {
+    return (
+      <View>
+        <TagComp textWidth={this.state.textWidth} prdName={this.state.prdName} randomKey={this.state.randomKey} />
+        <View style={{ flexDirection: 'row', marginTop: 100, alignSelf: 'center' }}>
+          <Pressable
+            onPress={() => {
+              this.setState({
+                textWidth: 167,
+                prdName: '香百年智能离子净化香氛机（XH-009)汽车车载香薰',
+                randomKey: this.state.randomKey + 1,
+              });
+            }}
+          >
+            <Text style={{ width: 72, height: 40, lineHeight: 40, textAlign: 'center', backgroundColor: 'red' }}>
+              重置
+            </Text>
+          </Pressable>
+          <Pressable
+            onPress={() => {
+              this.setState({
+                textWidth: 166,
+                prdName: '……%￥@！香百年智能离子净化香氛机（XH-009)汽车车载香薰',
+                randomKey: this.state.randomKey + 1,
+              });
+            }}
+          >
+            <Text
+              style={{
+                marginLeft: 6,
+                width: 72,
+                height: 40,
+                lineHeight: 40,
+                textAlign: 'center',
+                backgroundColor: 'red',
+              }}
+            >
+              触发
+            </Text>
+          </Pressable>
+        </View>
+      </View>
+    );
+  }
+}
+
+const style = StyleSheet.create({
+  prdName: {
+    fontSize: 13,
+    justifyContent: 'center',
+    height: 18,
+    lineHeight: 18,
+  },
+  prdTag: {
+    borderRadius: 4,
+    maxWidth: 116,
+    paddingLeft: 2,
+    paddingRight: 2,
+    paddingTop: 0.5,
+    paddingBottom: 1,
+    height: 14,
+    marginRight: 4,
+    textAlign: 'center',
+    textAlignVertical: 'center',
+    alignItems: 'center',
+    marginTop: -2,
+    overflow: 'hidden',
+  },
+  prdTagText: {
+    color: '#fff',
+    fontSize: 10,
+    lineHeight: 14,
+    width: '100%',
+    overflow: 'hidden',
+  },
+});
+
+export default App;
