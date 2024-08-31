@@ -11,7 +11,7 @@ import {
 class App extends Component {
   // fadeAnim will be used as the value for opacity. Initial Value: 0
   state = {
-    fadeAnim: new Animated.Value(0),
+    fadeAnim: new Animated.Value(0),2
   };
 
   fadeIn = () => {
