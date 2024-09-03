@@ -4,3 +4,7 @@ hello，我是rn团队，麻烦请将如下变更通知到您负责的应用相�
 
 变更影响：
 当未在metadata中配置half_leading或者配置为false时，设置了lineHeight属性的Text组件文字上下居中位置发生变更： 之前的版本中，lineHeight属性不会影响halfLeading居中特性。 升级到RNOH 5.0.0.500及以上版本，Text组件在设置lineHeight属性时，halfLeading居中特性会强制视为开启。
+
+
+https://developerlf.hwcloudtest.cn/consumer/cn/doc/harmonyos-guides-V5/map-display-order-V5#section147021431143110
+https://developerlf.hwcloudtest.cn/consumer/cn/doc/harmonyos-guides-V5/map-convert-coordinate-V5#section116043716599
