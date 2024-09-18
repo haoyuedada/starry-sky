@@ -1,0 +1,86 @@
+            <View style={styles.box}>
+                <Text style={{ padding: 3 }, styles.title}>8.accessibilityState</Text>
+                <Text style={{ padding: 3 }}></Text>
+                <Text style={{ padding: 3 }}>预期效果：向辅助技术的用户描述组件的当前状态。</Text>
+                <View>
+                    <Text>属性值：accessibilityState={"{{ 'disabled': true }}"}</Text>
+                    <Text>预期效果:点击文本内容后，提示“text one 不可点击”</Text>
+                    <Text>实际效果:</Text>
+                    <View
+                        style={{
+                            flex: 1,
+                            borderWidth: 5,
+                            borderColor: '#527FE4'
+                        }}
+                        accessible={true}
+                        accessibilityState={{ 'disabled': true }}
+                    >
+                        <Text>text one</Text>
+                    </View>
+                </View>
+                <View style={{ marginTop: 10 }}>
+                    <Text>属性值：accessibilityState={"{{ 'selected': true }}"}</Text>
+                    <Text>预期效果:点击文本内容后，提示“已选中 text one”</Text>
+                    <Text>实际效果:</Text>
+                    <View
+                        style={{
+                            flex: 1,
+                            borderWidth: 5,
+                            borderColor: '#527FE4'
+                        }}
+                        accessible={true}
+                        accessibilityState={{ 'selected': true }}
+                    >
+                        <Text>text one</Text>
+                    </View>
+                </View>
+                <View style={{ marginTop: 10 }}>
+                    <Text>属性值：accessibilityState={"{{ 'checked': true }}"}</Text>
+                    <Text>预期效果:点击文本内容后，提示“已选中 text one”</Text>
+                    <Text>实际效果:</Text>
+                    <View
+                        style={{
+                            flex: 1,
+                            borderWidth: 5,
+                            borderColor: '#527FE4'
+                        }}
+                        accessible={true}
+                        accessibilityState={{ 'checked': true }}
+                    >
+                        <Text>text one</Text>
+                    </View>
+                </View>
+                <View style={{ marginTop: 10 }}>
+                    <Text>属性值：accessibilityState={"{{ 'busy': true }}"}</Text>
+                    <Text>预期效果:点击文本内容后提示，busy</Text>
+                    <Text>实际效果:</Text>
+                    <View
+                        style={{
+                            flex: 1,
+                            borderWidth: 5,
+                            borderColor: '#527FE4'
+                        }}
+                        accessible={true}
+                        accessibilityState={{ 'busy': true }}
+                    >
+                        <Text>text one</Text>
+                    </View>
+                </View>
+                <View style={{ marginTop: 10 }}>
+                    <Text>属性值：accessibilityState={"{{ 'expanded': true }}"}</Text>
+                    <Text>预期效果:点击文本内容过后提示，“已展开 text one”</Text>
+                    <Text>实际效果:</Text>
+                    <View
+                        style={{
+                            flex: 1,
+                            borderWidth: 5,
+                            borderColor: '#527FE4'
+                        }}
+                        accessible={true}
+                        accessibilityState={{ 'expanded': true }}
+                    >
+                        <Text>text one</Text>
+                    </View>
+                </View>
+
+            </View>
