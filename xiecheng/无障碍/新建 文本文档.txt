@@ -84,6 +84,44 @@
                 </View>
 
             </View>
+=============================================================
+      <TestSuite name="accessibilityRole">
+        <TestCase.Example itShould="announce text specified in the appropriate column">
+          <View style={{padding: 16, flexDirection: 'row', width: '100%'}}>
+            <Text style={{width: '33%', fontWeight: 'bold'}}>Role</Text>
+            <Text style={{width: '33%', fontWeight: 'bold'}}>Android</Text>
+            <Text style={{width: '33%', fontWeight: 'bold'}}>Harmony</Text>
+          </View>
+          {Array.from(
+            ANNOUNCEMENT_BY_PLATFORM_BY_ACCESSIBILITY_ROLE.entries(),
+          ).map(([role, {android, harmony}]) => {
+            return (
+              <View
+                key={role}
+                accessible
+                accessibilityRole={role}
+                style={{
+                  padding: 16,
+                  flexDirection: 'row',
+                  width: '100%',
+                  borderBottomWidth: 1,
+                  borderColor: 'silver',
+                }}>
+                <Text style={{width: '33%'}} importantForAccessibility="no">
+                  {role}
+                </Text>
+                <Text style={{width: '33%'}} importantForAccessibility="no">
+                  {android}
+                </Text>
+                <Text style={{width: '33%'}} importantForAccessibility="no">
+                  {harmony}
+                </Text>
+              </View>
+            );
+          })}
+        </TestCase.Example>
+      </TestSuite>
+===============================================================
 
 
 
