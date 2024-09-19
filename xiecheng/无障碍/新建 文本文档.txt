@@ -146,8 +146,44 @@
                 />
             </View>
 ===============================================================
-
-
+const roleList = [
+    { type: 'alert', expect: '提示alert', value: '警告' },
+    { type: 'button', expect: '提示当前内容是一个按钮', value: '按钮' },
+    { type: 'checkbox', expect: '提示当前内容是一个复选框', value: '复选框' },
+    { type: 'heading', expect: '提示当前内容是一个标题', value: '标题' },
+    { type: 'menu', expect: '提示当前内容是一个menu', value: '菜单' },
+    { type: 'menubar', expect: '提示当前内容是一个menubar', value: '菜单栏' },
+    { type: 'menuitem', expect: '提示当前内容是一个menuitem', value: '菜单项' },
+    { type: 'progressbar', expect: '提示当前内容是一个progressbar', value: '进度条' },
+    { type: 'radio', expect: '提示当前内容是一个单选按钮', value: '单选' },
+    { type: 'radiogroup', expect: '提示当前内容是一个radiogroup', value: '单选按钮组' },
+    { type: 'slider', expect: '提示当前内容是一个进度条', value: '	滑动条' },
+    { type: 'spinbutton', expect: '提示当前内容是一个spinbutton', value: '微调' },
+    { type: 'tab', expect: '提示当前内容是一个tab', value: 'tab标签' },
+    { type: 'tablist', expect: '提示当前内容是一个tablist', value: '提示文本' },
+    { type: 'timer', expect: '提示当前内容是一个timer', value: '计数' },
+    { type: 'toolbar', expect: '提示当前内容是一个toolbar', value: '工具栏' },
+]
+            <View style={styles.box}>
+                <Text style={{ padding: 3 }, styles.title}>29.role</Text>
+                <Text style={{ padding: 3 }}>预期结果：</Text>
+                <Text>实际结果：</Text>
+                <View>
+                    {roleList.map((item, index) => (
+                        <View key={index} style={{ paddingBottom: 10 }}>
+                            <Text>属性值：{item.type}</Text>
+                            <Text>预期结果：{item.expect}</Text>
+                            <Text>实际结果：</Text>
+                            <View
+                                style={{ flex: 1, borderColor: '#527FE4', borderWidth: 5, }}
+                                accessible={true}
+                                role={item.type}>
+                                <Text style={{ padding: 10 }} >22</Text>
+                            </View>
+                        </View>
+                    ))}
+                </View>
+            </View>
 
 const styles = StyleSheet.create({
     container: {
