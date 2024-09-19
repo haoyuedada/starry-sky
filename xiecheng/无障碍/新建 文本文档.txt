@@ -122,6 +122,25 @@
         </TestCase.Example>
       </TestSuite>
 ===============================================================
+            <View
+                accessible={true}
+                aria-checked={checked ? true : mixed ? 'mixed' : false}
+                style={styles.box}
+                accessibilityRole="checkbox"
+                accessibilityState={{ checked }}>
+                <Text style={{ padding: 3 }, styles.title}>7.accessibilityRole</Text>
+                <Text style={{ padding: 3 }}>属性值：checkbox</Text>
+                <Text style={{ padding: 3 }}>预期效果：让屏幕阅读器显示:当两个按钮都被选中时，显示'checked, mixed';当一个按钮被选中时，显示'mixed';当一个按钮都没有被选中时，显示'unchecked'。</Text>
+                <Button
+                    title={`第一个 ${firstChecked ? '选中了' : '没选中'}`}
+                    onPress={() => setFirstChecked(!firstChecked)}
+                />
+                <Button
+                    title={`第二个 ${secondChecked ? '选中了' : '没选中'}`}
+                    onPress={() => setSecondChecked(!secondChecked)}
+                />
+            </View>
+===============================================================
 
 
 
