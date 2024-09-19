@@ -122,6 +122,11 @@
         </TestCase.Example>
       </TestSuite>
 ===============================================================
+    const [firstChecked, setFirstChecked] = useState < boolean > (false);
+    const [secondChecked, setSecondChecked] = useState < boolean > (false);
+    const checked = firstChecked && secondChecked;
+    const mixed = firstChecked !== secondChecked;
+
             <View
                 accessible={true}
                 aria-checked={checked ? true : mixed ? 'mixed' : false}
