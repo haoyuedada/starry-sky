@@ -2,11 +2,13 @@ const fullUrl = "https://openapi.vmall.com/ccs/question/queryQuestionOverview?pr
 
 const url = new URL(fullUrl);
 const params = new URLSearchParams(url.search);
-const encodedParams = {};
+const processedParams = {};
 
 params.forEach((value, key) => {
-    encodedParams[encodeURIComponent(key)] = encodeURIComponent(value);
+    // 判断是否包含中文字符
+    const isChinese = /[\u4e00-\u9fa5]/.test(value);
+    processedParams[encodeURIComponent(key)] = isChinese ? encodeURIComponent(value) : value;
 });
 
-console.log(encodedParams);
+console.log(processedParams);
 // 输出: { productId: "%E4%B8%AD%E6%96%87", _becode: "CN", displayUnPublic: "false", displayTopQuestion: "true" }
