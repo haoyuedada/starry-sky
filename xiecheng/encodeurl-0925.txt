@@ -1,0 +1,12 @@
+const fullUrl = "https://openapi.vmall.com/ccs/question/queryQuestionOverview?productId=中文&_becode=CN&displayUnPublic=false&displayTopQuestion=true";
+
+const url = new URL(fullUrl);
+const params = new URLSearchParams(url.search);
+const encodedParams = {};
+
+params.forEach((value, key) => {
+    encodedParams[encodeURIComponent(key)] = encodeURIComponent(value);
+});
+
+console.log(encodedParams);
+// 输出: { productId: "%E4%B8%AD%E6%96%87", _becode: "CN", displayUnPublic: "false", displayTopQuestion: "true" }
