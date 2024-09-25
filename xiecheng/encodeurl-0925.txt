@@ -12,3 +12,7 @@ params.forEach((value, key) => {
 
 console.log(processedParams);
 // 输出: { productId: "%E4%B8%AD%E6%96%87", _becode: "CN", displayUnPublic: "false", displayTopQuestion: "true" }
+
+
+
+https://openapi.vmall.com/ccs/question/queryQuestionOverview?productId=中文&_becode=CN&displayUnPublic=false&displayTopQuestion=true
