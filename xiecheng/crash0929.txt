@@ -1,0 +1,20 @@
+Device info:HUAWEI Mate X5
+Build info:ALT-AL10 5.0.0.68(SP9C00E68R6P7log)
+Fingerprint:7506b6c6568b29e76f184d77f1f373acc935e5cdb42a1bc3434ea47f0efee270
+Module name:com.ctrip.harmonynext
+Version:8.73.6
+VersionCode:1000009
+PreInstalled:No
+Foreground:Yes
+Pid:22609
+Uid:20020165
+Reason:TypeError
+Error name:TypeError
+Error message:Cannot read property parentTag of undefined
+Stacktrace:
+Cannot get SourceMap info, dump raw stack:
+at aboutToAppear (phone|@rnoh/react-native-openharmony|0.72.28-beta.20240830101214|src/main/ets/RNOHCorePackage/components/RNViewBase/RNViewBase.ts:234:1)
+at buildWithNestingBuilder (../../../foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/engine/jsXNode.js:200:1)
+at build (../../../foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/engine/jsXNode.js:208:1)
+at build (../../../foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/engine/jsXNode.js:69:1)
+at create (phone|@rnoh/react-native-openharmony|0.72.28-beta.20240830101214|src/main/ets/RNOH/CustomRNComponentFrameNodeFactory.ts:36:1)
