@@ -1,0 +1,8 @@
+在module.json5的module中添加：
+
+"metadata": [
+{
+"name": "can_preview_text",
+"value": "false",
+},
+],
