@@ -25,3 +25,19 @@
 
 
 提示
+
+
+// please define the JavaScript input here(you can also rewrite the input). 
+// following is the default: 
+process.stdin.resume();
+process.stdin.setEncoding('utf-8');
+let input = '';
+process.stdin.on('data', (data) => {
+  input += data;
+});
+process.stdin.on('end', () => {
+  let inputArray = input.split('\n');
+  // please finish the function body here.       
+  // please define the JavaScript output here. For example: console.log(result);
+  process.exit();
+});
