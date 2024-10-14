@@ -1,0 +1,30 @@
+import { TestSuite } from '@rnoh/testerino';
+import { Alert, Text, View, TouchableHighlight, ImageBackground, StyleSheet } from 'react-native';
+import { useState } from 'react';
+
+export default function AlertTest() {
+    return (
+        <View accessible={true} style={{marginTop: 200}}>
+            <Text style={{ padding: 3 }}>属性值:accessibilityHint</Text>
+            <Text style={{ padding: 3 }}>预期效果:选中下方天蓝色背景图片,屏幕朗读“React图片背景,提示1”</Text>
+            <ImageBackground
+                accessible={true}
+                aria-label="React图片背景"
+                accessibilityHint='提示1'
+                style={styles.image}
+                source={require('./bunny.png')}>
+            </ImageBackground>
+        </View>
+    );
+}
+
+const styles = StyleSheet.create({
+    image: {
+        flex: 1,
+        justifyContent: 'center',
+        height: 120,
+        width: 120,
+        backgroundColor: 'skyblue',
+        marginHorizontal: 5
+    }
+});
