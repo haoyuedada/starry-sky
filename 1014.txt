@@ -1,0 +1,64 @@
+import React from 'react';
+import { View, Text, StyleSheet, Animated } from 'react-native';
+import {
+  GeneratedSampleComponentArkTSRef,
+  GeneratedSampleComponentArkTS,
+} from 'react-native-sample-package';
+import {Ref} from './components';
+
+
+function MyCustomComponent() {
+  return (
+    <Ref<GeneratedSampleComponentArkTSRef>
+      render={ref => (
+        <GeneratedSampleComponentArkTS
+          ref={ref}
+          testProps={{
+            booleanTest: true,
+            intTest: 42,
+            floatTest: 42.5,
+            doubleTest: 42.5,
+            stringTest: 'foobar',
+            objectTest: {foo: {bar: 'baz'}},
+            colorTest: 'red',
+            arrayTest: ['foo', 'bar'],
+            readOnlyArrayTest: ['foo', 'bar'],
+            intEnumTest: 1,
+          }}>
+        </GeneratedSampleComponentArkTS>
+      )}
+    />
+  );
+};
+
+const App = () => {
+  return (
+    <View style={styles.container}>
+      {/* 第一个兄弟节点 */}
+      <Text style={styles.text}>This is the first sibling</Text>
+      {/* 自定义arkts组件 */}
+      <MyCustomComponent></MyCustomComponent>
+      {/* 第二个兄弟节点 */}
+      <Text style={styles.text}>This is the second sibling</Text>
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  customComponent: {
+    padding: 10,
+    backgroundColor: 'lightblue',
+    marginVertical: 10,
+  },
+  text: {
+    fontSize: 18,
+    marginVertical: 10,
+  },
+});
+
+export default App;
