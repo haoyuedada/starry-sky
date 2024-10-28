@@ -1,0 +1,51 @@
+import React, { useEffect, useRef } from 'react';
+import { StyleSheet, View, TextInput, Button, ScrollView } from 'react-native';
+
+const InputDemo = () => {
+    const scrollRef = useRef<ScrollView | null>(null);
+
+    useEffect(() => {
+        setTimeout(() => {
+            scrollRef.current?.scrollToEnd({ animated: false });
+        }, 1000);
+    }, []);
+
+    return (
+        <View style={styles.container}>
+            <ScrollView style={styles.flexItem} ref={(ref) => (scrollRef.current = ref)}>
+                <TextInput style={styles.input} placeholder="请输入AAA" />
+                <TextInput style={styles.input} placeholder="请输入BBB" />
+                <TextInput style={styles.input} placeholder="请输入CCC" />
+                <TextInput style={styles.input} placeholder="请输入DDD" />
+                <TextInput style={styles.input} placeholder="请输入EEE" />
+                <TextInput style={styles.input} placeholder="请输入FFF" />
+                <TextInput style={styles.input} placeholder="请输入GGG" />
+                <TextInput style={styles.input} placeholder="请输入HHH" />
+                <TextInput style={styles.input} placeholder="请输入III" />
+                <TextInput style={styles.input} placeholder="请输入JJJ" />
+                <TextInput style={styles.input} placeholder="请输入KKK" />
+                <TextInput style={styles.input} placeholder="请输入LLL" />
+            </ScrollView>
+        </View>
+    );
+};
+
+export default InputDemo;
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: 'white',
+    },
+    flexItem: {
+        flex: 1,
+    },
+    input: {
+        margin: 20,
+        borderWidth: 1,
+        borderColor: 'black',
+        borderRadius: 12,
+        fontSize: 16,
+        padding: 8,
+    },
+});
