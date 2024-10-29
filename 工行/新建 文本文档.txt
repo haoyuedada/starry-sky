@@ -1,0 +1,102 @@
+project(rnapp)
+cmake_minimum_required(VERSION 3.4.1)
+set(NATIVERENDER_ROOT_PATH ${CMAKE_CURRENT_SOURCE_DIR})
+set(OH_MODULE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../../oh_modules")
+
+set(RNOH_CPP_DIR "${OH_MODULE_DIR}/rnoh/src/main/include")
+set(REACT_COMMON_PATCH_DIR "${RNOH_CPP_DIR}/patches/react_native_core")
+
+set(CMAKE_CXX_STANDARD 17)
+# folly的编译选项
+set(folly_compile_options
+    -DFOLLY_NO_CONFIG=1
+    -DFOLLY_MOBILE=1
+    -DFOLLY_USE_LIBCPP=1
+    -DFOLLY_HAVE_RECVMMSG=1
+    -DFOLLY_HAVE_PTHREAD=1
+    -Wno-comma
+    -Wno-shorten-64-to-32
+    -Wno-documentation
+    -faligned-new
+)
+
+add_compile_options("-Wno-unused-command-line-argument")
+# 添加头文件目录
+include_directories(${RNOH_CPP_DIR}
+                    ${REACT_COMMON_PATCH_DIR}
+                    ${RNOH_CPP_DIR}/third-party/folly
+                    ${RNOH_CPP_DIR}/third-party/rn/ReactCommon
+                    ${RNOH_CPP_DIR}/third-party/rn/ReactCommon/react/nativemodule/core
+                    ${RNOH_CPP_DIR}/third-party/rn/ReactCommon/jsi
+                    ${RNOH_CPP_DIR}/third-party/rn/ReactCommon/callinvoker
+                    ${RNOH_CPP_DIR}/third-party/boost/libs/utility/include
+                    ${RNOH_CPP_DIR}/third-party/boost/libs/config/include
+                    ${RNOH_CPP_DIR}/third-party/boost/libs/core/include
+                    ${RNOH_CPP_DIR}/third-party/boost/libs/preprocessor/include
+                    ${RNOH_CPP_DIR}/third-party/double-conversion
+                    ${RNOH_CPP_DIR}/third-party/rn/ReactCommon/react/renderer/graphics/platform/cxx
+                    ${RNOH_CPP_DIR}/third-party/rn/ReactCommon/runtimeexecutor
+                    ${RNOH_CPP_DIR}/third-party/glog/src
+                    ${RNOH_CPP_DIR}/third-party/boost/libs/mpl/include
+                    ${RNOH_CPP_DIR}/third-party/boost/libs/type_traits/include
+                    ${RNOH_CPP_DIR}/third-party/rn/ReactCommon/yoga
+                    ${RNOH_CPP_DIR}/third-party/boost/libs/intrusive/include
+                    ${RNOH_CPP_DIR}/third-party/boost/libs/assert/include
+                    ${RNOH_CPP_DIR}/third-party/boost/libs/move/include
+                    ${RNOH_CPP_DIR}/third-party/boost/libs/static_assert/include
+                    ${RNOH_CPP_DIR}/third-party/boost/libs/container_hash/include
+                    ${RNOH_CPP_DIR}/third-party/boost/libs/describe/include
+                    ${RNOH_CPP_DIR}/third-party/boost/libs/mp11/include
+                    ${RNOH_CPP_DIR}/third-party/boost/libs/iterator/include
+                    ${RNOH_CPP_DIR}/third-party/boost/libs/detail/include
+                    ${RNOH_CPP_DIR}/patches/react_native_core/react/renderer/textlayoutmanager/platform/harmony
+                    )
+
+configure_file(
+  ${RNOH_CPP_DIR}/third-party/folly/CMake/folly-config.h.cmake
+  ${RNOH_CPP_DIR}/third-party/folly/folly/folly-config.h
+)
+# 添加rnoh动态共享包
+add_library(rnoh_target SHARED "${RNOH_CPP_DIR}/RNOHOther.cpp")
+# 链接其他so
+target_link_directories(rnoh_target PUBLIC ${OH_MODULE_DIR}/rnoh/libs/arm64-v8a)
+target_link_libraries(rnoh_target PUBLIC
+    libace_napi.z.so
+    libhilog_ndk.z.so
+    libnative_vsync.so
+    libnative_drawing.so
+    rnoh
+    react_render_scheduler
+    rrc_image
+    rrc_text
+    rrc_textinput
+    rrc_scrollview
+    react_nativemodule_core
+    react_render_animations
+    react_render_componentregistry
+    rrc_view
+    react_render_graphics
+    react_render_core
+    react_render_attributedstring
+    react_render_debug
+    jsi
+    react_render_imagemanager)
+
+# RNOH_BEGIN: add_package_subdirectories
+add_subdirectory("${OH_MODULE_DIR}/rnoh-sample-package/src/main/cpp" ./sample-package)
+# 三方包得加上folly编译配置
+target_compile_options(rnoh_sample_package PUBLIC ${folly_compile_options})
+# RNOH_END: add_package_subdirectories
+# 添加rnoh_app共享包
+add_library(rnoh_app SHARED
+    "./PackageProvider.cpp"
+    "${RNOH_CPP_DIR}/RNOHOther.cpp"
+    "${RNOH_CPP_DIR}/RNOHAppNapiBridge.cpp"
+)
+
+# RNOH_BEGIN: link_packages
+target_link_libraries(rnoh_app PUBLIC rnoh_target)
+target_link_libraries(rnoh_app PUBLIC rnoh_sample_package)
+# RNOH_END: link_packages
+
+target_compile_options(rnoh_app PUBLIC ${folly_compile_options} -DRAW_PROPS_ENABLED -std=c++17)
