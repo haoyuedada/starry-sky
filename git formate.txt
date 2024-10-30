@@ -1,0 +1,1 @@
+git log --pretty=format:"- %s,([%h](https://github.com/react-native-openharmony/rnoh/commit/%H")) > commit_log1.md
