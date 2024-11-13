@@ -1,1 +1,8 @@
 error: invalid operands to binary expression ('basic_ostream<char, std::char_traits<char>>' and 'const std::optional<int>')
+
+struct AccessibilityValue {
+  std::optional<int> min;
+  std::optional<int> max;
+  std::optional<int> now;
+  std::optional<std::string> text{};
+};
