@@ -1,0 +1,257 @@
+Subject: [PATCH] SupportsRemoveDeleteTree
+---
+Index: tester/harmony/react_native_openharmony/src/main/cpp/RNOH/arkui/ArkUINode.h
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/tester/harmony/react_native_openharmony/src/main/cpp/RNOH/arkui/ArkUINode.h b/tester/harmony/react_native_openharmony/src/main/cpp/RNOH/arkui/ArkUINode.h
+--- a/tester/harmony/react_native_openharmony/src/main/cpp/RNOH/arkui/ArkUINode.h	(revision 6a38d57f40f998874437db5796445b1ac78e8112)
++++ b/tester/harmony/react_native_openharmony/src/main/cpp/RNOH/arkui/ArkUINode.h	(date 1732959141905)
+@@ -57,6 +57,7 @@
+   ArkUINode(ArkUI_NodeHandle nodeHandle);
+ 
+   void setArkUINodeDelegate(ArkUINodeDelegate* arkUiNodeDelegate);
++  void removeAllChildren();
+ 
+   void markDirty();
+   void saveSize(int32_t width, int32_t height);
+Index: tester/harmony/react_native_openharmony/src/main/cpp/RNOH/ComponentInstance.h
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/tester/harmony/react_native_openharmony/src/main/cpp/RNOH/ComponentInstance.h b/tester/harmony/react_native_openharmony/src/main/cpp/RNOH/ComponentInstance.h
+--- a/tester/harmony/react_native_openharmony/src/main/cpp/RNOH/ComponentInstance.h	(revision 6a38d57f40f998874437db5796445b1ac78e8112)
++++ b/tester/harmony/react_native_openharmony/src/main/cpp/RNOH/ComponentInstance.h	(date 1732959141919)
+@@ -106,6 +106,16 @@
+    * @internal
+    */
+   void removeChild(ComponentInstance::Shared childComponentInstance);
++    
++  /**
++   * @internal
++   */
++  void getChildrenTag(std::vector<facebook::react::Tag>& tags);
++    
++    /**
++   * @internal
++   */
++  void removeAllChildren();
+ 
+   virtual facebook::react::Props::Shared getProps() const = 0;
+ 
+Index: tester/harmony/react_native_openharmony/src/main/cpp/RNOH/ComponentInstance.cpp
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/tester/harmony/react_native_openharmony/src/main/cpp/RNOH/ComponentInstance.cpp b/tester/harmony/react_native_openharmony/src/main/cpp/RNOH/ComponentInstance.cpp
+--- a/tester/harmony/react_native_openharmony/src/main/cpp/RNOH/ComponentInstance.cpp	(revision 6a38d57f40f998874437db5796445b1ac78e8112)
++++ b/tester/harmony/react_native_openharmony/src/main/cpp/RNOH/ComponentInstance.cpp	(date 1732959141912)
+@@ -36,4 +36,18 @@
+     onChildRemoved(childComponentInstance);
+   }
+ }
++
++void ComponentInstance::removeAllChildren() {
++  this->getLocalRootArkUINode().removeAllChildren();
++}
++
++void ComponentInstance::getChildrenTag(std::vector<facebook::react::Tag>& tags) {
++    tags.push_back(this->m_tag);
++    
++    for (auto child : m_children) {
++      if(child != nullptr) {
++        child->getChildrenTag(tags);  
++      }
++    }
++}
+ } // namespace rnoh
+Index: tester/harmony/react_native_openharmony/src/main/cpp/RNOH/arkui/ArkUINode.cpp
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/tester/harmony/react_native_openharmony/src/main/cpp/RNOH/arkui/ArkUINode.cpp b/tester/harmony/react_native_openharmony/src/main/cpp/RNOH/arkui/ArkUINode.cpp
+--- a/tester/harmony/react_native_openharmony/src/main/cpp/RNOH/arkui/ArkUINode.cpp	(revision 6a38d57f40f998874437db5796445b1ac78e8112)
++++ b/tester/harmony/react_native_openharmony/src/main/cpp/RNOH/arkui/ArkUINode.cpp	(date 1732959141898)
+@@ -146,6 +146,11 @@
+   return m_nodeHandle;
+ }
+ 
++void ArkUINode::removeAllChildren() {
++  maybeThrow(NativeNodeApi::getInstance()->removeAllChildren(
++      m_nodeHandle));
++}
++
+ std::string ArkUINode::getId() const {
+   auto idItem =
+       NativeNodeApi::getInstance()->getAttribute(m_nodeHandle, NODE_ID);
+Index: tester/harmony/react_native_openharmony/src/main/cpp/third-party/rn/ReactCommon/react/renderer/mounting/TelemetryController.cpp
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/tester/harmony/react_native_openharmony/src/main/cpp/third-party/rn/ReactCommon/react/renderer/mounting/TelemetryController.cpp b/tester/harmony/react_native_openharmony/src/main/cpp/third-party/rn/ReactCommon/react/renderer/mounting/TelemetryController.cpp
+--- a/tester/harmony/react_native_openharmony/src/main/cpp/third-party/rn/ReactCommon/react/renderer/mounting/TelemetryController.cpp	(revision 6a38d57f40f998874437db5796445b1ac78e8112)
++++ b/tester/harmony/react_native_openharmony/src/main/cpp/third-party/rn/ReactCommon/react/renderer/mounting/TelemetryController.cpp	(date 1732959141950)
+@@ -8,6 +8,7 @@
+ #include "TelemetryController.h"
+ 
+ #include <react/renderer/mounting/MountingCoordinator.h>
++#include <react/renderer/debug/SystraceSection.h>
+ 
+ namespace facebook::react {
+ 
+@@ -19,6 +20,7 @@
+     MountingTransactionCallback const &willMount,
+     MountingTransactionCallback const &doMount,
+     MountingTransactionCallback const &didMount) const {
++  facebook::react::SystraceSection s("TelemetryController::pullTransaction");
+   auto optional = mountingCoordinator_.pullTransaction();
+   if (!optional.has_value()) {
+     return false;
+Index: tester/harmony/react_native_openharmony/src/main/cpp/third-party/rn/ReactCommon/react/renderer/mounting/ShadowViewMutation.cpp
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/tester/harmony/react_native_openharmony/src/main/cpp/third-party/rn/ReactCommon/react/renderer/mounting/ShadowViewMutation.cpp b/tester/harmony/react_native_openharmony/src/main/cpp/third-party/rn/ReactCommon/react/renderer/mounting/ShadowViewMutation.cpp
+--- a/tester/harmony/react_native_openharmony/src/main/cpp/third-party/rn/ReactCommon/react/renderer/mounting/ShadowViewMutation.cpp	(revision 6a38d57f40f998874437db5796445b1ac78e8112)
++++ b/tester/harmony/react_native_openharmony/src/main/cpp/third-party/rn/ReactCommon/react/renderer/mounting/ShadowViewMutation.cpp	(date 1732959892263)
+@@ -15,7 +15,7 @@
+  * Initialize static feature flags for this module.
+  * These flags should be treated as temporary.
+  */
+-bool ShadowViewMutation::PlatformSupportsRemoveDeleteTreeInstruction = false;
++bool ShadowViewMutation::PlatformSupportsRemoveDeleteTreeInstruction = true;
+ 
+ ShadowViewMutation ShadowViewMutation::CreateMutation(ShadowView shadowView) {
+   return {
+Index: tester/harmony/react_native_openharmony/src/main/cpp/RNOH/MountingManagerCAPI.cpp
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/tester/harmony/react_native_openharmony/src/main/cpp/RNOH/MountingManagerCAPI.cpp b/tester/harmony/react_native_openharmony/src/main/cpp/RNOH/MountingManagerCAPI.cpp
+--- a/tester/harmony/react_native_openharmony/src/main/cpp/RNOH/MountingManagerCAPI.cpp	(revision 6a38d57f40f998874437db5796445b1ac78e8112)
++++ b/tester/harmony/react_native_openharmony/src/main/cpp/RNOH/MountingManagerCAPI.cpp	(date 1732959706655)
+@@ -48,6 +48,7 @@
+ }
+ 
+ void MountingManagerCAPI::didMount(MutationList const& mutations) {
++    SystraceSection s("MountingManagerCAPI::didMount");
+     auto validMutations = getValidMutations(mutations);
+     m_arkTsMountingManager->didMount(validMutations);
+  
+@@ -297,6 +298,24 @@
+           updateComponentWithShadowView(
+               componentInstance, mutation.newChildShadowView);
+         }
++        break;
++      }
++      case facebook::react::ShadowViewMutation::RemoveDeleteTree:{
++        auto parentComponentInstance = m_componentInstanceRegistry->findByTag(
++            mutation.parentShadowView.tag);
++        if (parentComponentInstance) {
++          auto oldRootComponentInstance = m_componentInstanceRegistry->findByTag(
++                  mutation.oldChildShadowView.tag);
++          std::vector<facebook::react::Tag> tags ;
++          if(oldRootComponentInstance) {
++            parentComponentInstance->removeChild(oldRootComponentInstance);
++            oldRootComponentInstance->getChildrenTag(tags);
++            oldRootComponentInstance->removeAllChildren();
++            for(auto tag : tags) {
++              m_componentInstanceRegistry->deleteByTag(tag);      
++            }       
++          }
++        }
+         break;
+       }
+     }
+Index: tester/harmony/react_native_openharmony/src/main/cpp/third-party/rn/ReactCommon/react/renderer/mounting/MountingCoordinator.cpp
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/tester/harmony/react_native_openharmony/src/main/cpp/third-party/rn/ReactCommon/react/renderer/mounting/MountingCoordinator.cpp b/tester/harmony/react_native_openharmony/src/main/cpp/third-party/rn/ReactCommon/react/renderer/mounting/MountingCoordinator.cpp
+--- a/tester/harmony/react_native_openharmony/src/main/cpp/third-party/rn/ReactCommon/react/renderer/mounting/MountingCoordinator.cpp	(revision 6a38d57f40f998874437db5796445b1ac78e8112)
++++ b/tester/harmony/react_native_openharmony/src/main/cpp/third-party/rn/ReactCommon/react/renderer/mounting/MountingCoordinator.cpp	(date 1732959141943)
+@@ -16,6 +16,7 @@
+ 
+ #include <react/debug/react_native_assert.h>
+ #include <react/renderer/mounting/ShadowViewMutation.h>
++#include <react/renderer/debug/SystraceSection.h>
+ 
+ namespace facebook::react {
+ 
+@@ -76,6 +77,7 @@
+ 
+ std::optional<MountingTransaction> MountingCoordinator::pullTransaction()
+     const {
++  facebook::react::SystraceSection s("MountingCoordinator::pullTransaction");
+   std::lock_guard<std::mutex> lock(mutex_);
+ 
+   auto transaction = std::optional<MountingTransaction>{};
+Index: tester/harmony/react_native_openharmony/src/main/cpp/third-party/rn/ReactCommon/react/renderer/mounting/Differentiator.cpp
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/tester/harmony/react_native_openharmony/src/main/cpp/third-party/rn/ReactCommon/react/renderer/mounting/Differentiator.cpp b/tester/harmony/react_native_openharmony/src/main/cpp/third-party/rn/ReactCommon/react/renderer/mounting/Differentiator.cpp
+--- a/tester/harmony/react_native_openharmony/src/main/cpp/third-party/rn/ReactCommon/react/renderer/mounting/Differentiator.cpp	(revision 6a38d57f40f998874437db5796445b1ac78e8112)
++++ b/tester/harmony/react_native_openharmony/src/main/cpp/third-party/rn/ReactCommon/react/renderer/mounting/Differentiator.cpp	(date 1732959141936)
+@@ -1169,16 +1169,18 @@
+                 parentShadowView,
+                 oldChildPair.shadowView,
+                 static_cast<int>(oldChildPair.mountIndex)));
++        return;
+       }
+-
+-      mutationContainer.deleteMutations.push_back(
++      {
++         SystraceSection s("PlatformSupportsRemoveDeleteTreeInstruction == ",ShadowViewMutation::PlatformSupportsRemoveDeleteTreeInstruction);       
++         mutationContainer.deleteMutations.push_back(
+           ShadowViewMutation::DeleteMutation(
+               oldChildPair.shadowView,
+               isRecursionRedundant ||
+                   ShadowViewMutation::
+                       PlatformSupportsRemoveDeleteTreeInstruction));
+-      mutationContainer.removeMutations.push_back(
+-          ShadowViewMutation::RemoveMutation(
++          mutationContainer.removeMutations.push_back(
++            ShadowViewMutation::RemoveMutation(
+               parentShadowView,
+               oldChildPair.shadowView,
+               static_cast<int>(oldChildPair.mountIndex),
+@@ -1186,17 +1188,18 @@
+                   ShadowViewMutation::
+                       PlatformSupportsRemoveDeleteTreeInstruction));
+ 
+-      // We also have to call the algorithm recursively to clean up the entire
+-      // subtree starting from the removed view.
+-      ViewNodePairScope innerScope{};
+-      calculateShadowViewMutationsV2(
+-          innerScope,
+-          mutationContainer.destructiveDownwardMutations,
+-          oldChildPair.shadowView,
+-          sliceChildShadowNodeViewPairsFromViewNodePair(
+-              oldChildPair, innerScope),
+-          {},
+-          ShadowViewMutation::PlatformSupportsRemoveDeleteTreeInstruction);
++          // We also have to call the algorithm recursively to clean up the entire
++          // subtree starting from the removed view.
++          ViewNodePairScope innerScope{};
++          calculateShadowViewMutationsV2(
++              innerScope,
++              mutationContainer.destructiveDownwardMutations,
++              oldChildPair.shadowView,
++              sliceChildShadowNodeViewPairsFromViewNodePair(
++                  oldChildPair, innerScope),
++              {},
++              ShadowViewMutation::PlatformSupportsRemoveDeleteTreeInstruction);
++      }
+     }
+   } else if (index == oldChildPairs.size()) {
+     // If we don't have any more existing children we can choose a fast path
