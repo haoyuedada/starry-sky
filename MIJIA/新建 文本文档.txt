@@ -1,0 +1,11 @@
+  let miotSDK = TurboModuleRegistry.getEnforcing('SampleTurboModule')
+  let miotSDK2 = {};
+  let keys = Object.keys(miotSDK);
+  let length = Object.keys(miotSDK).length;
+  for(let i = 0; i < length; i++){
+    let key = keys[i];
+    miotSDK2[key] = miotSDK[key];
+  }
+  console.log("miotSDK2:", miotSDK2)
+  miotSDK2["aaaaaaaaaa"] = '232';
+  console.log("miotSDK2:", miotSDK2)
