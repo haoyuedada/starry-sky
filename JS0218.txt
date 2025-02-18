@@ -1,0 +1,139 @@
+if (methodName == "batchCreateNode") {
+    LOG(INFO) << "CHY batchCreateNode1";
+  return jsi::Function::createFromHostFunction(
+      runtime,
+      name,
+      1,
+      [uiManager, this](
+          jsi::Runtime &runtime,
+          jsi::Value const & /*thisValue*/,
+          jsi::Value const *arguments,
+          size_t /*count*/) noexcept -> jsi::Value {
+        if (!arguments[0].isObject() || !arguments[0].asObject(runtime).isArray(runtime)) {
+           //LOG(INFO) <<"[UIManagercpp_batchCreateNode ] need array";
+        }
+
+        auto nodeParamsArray = arguments[0].asObject(runtime).asArray(runtime);
+        size_t arrayLength = nodeParamsArray.length(runtime);
+        struct Param {
+            Param(Tag tag, std::string&& name, SurfaceId surfaceId, std::shared_ptr<RawProps>&& rawProps,
+              SharedEventTarget&& eventTarget):
+              tag(tag), name(std::forward<std::string>(name)), surfaceId(surfaceId),
+              rawProps(std::forward<std::shared_ptr<RawProps>>(rawProps)),
+              eventTarget(std::forward<SharedEventTarget>(eventTarget)) {}
+            Tag tag;
+            std::string name;
+            SurfaceId surfaceId;
+            std::shared_ptr<RawProps> rawProps;
+            SharedEventTarget eventTarget;
+        };
+        
+        std::vector<jsi::Object> nodes;
+        nodes.reserve(arrayLength);
+        std::vector<Param> params;
+        params.reserve(arrayLength);
+
+        auto ptag = jsi::String::createFromAscii(runtime, "tag");
+        auto puiViewClassName = jsi::String::createFromAscii(runtime, "uiViewClassName");
+        auto prenderLanes = jsi::String::createFromAscii(runtime, "renderLanes");
+        auto pupdatePayload = jsi::String::createFromAscii(runtime, "updatePayload");
+        auto pworkInProgress = jsi::String::createFromAscii(runtime, "workInProgress");
+        auto pnode = jsi::String::createFromAscii(runtime, "node");
+        auto pcobj = jsi::String::createFromAscii(runtime, "cobj");
+
+        constexpr bool do_not_parallel = false; // [opt] switch 测jsi收益
+        constexpr bool test_flame = false; // [opt] switch 测火焰图时重复1000遍
+        auto agent = ffrt::job_agent2::thread_singleton();
+        for (size_t ii = 0; ii < (test_flame ? 1000 : 1); ++ii) {
+        //x::clock_scope sc("batchCreate");
+
+		ffrt::is_main() = true;
+        constexpr uint64_t GROUP_NUM = 2; // [opt] switch 分组次数
+        constexpr uint64_t GROUP_NUM2 = 100; // [opt] switch 分组次数2
+        // std::array<char, (sizeof(ffrt::job_agent2::job_t) + 7)/8*8> stack[GROUP_NUM];
+        using co_stack = std::array<char, (sizeof(ffrt::job_agent2::job_t) + 7) / 8 * 8>;
+        static thread_local auto stack = new co_stack [GROUP_NUM * GROUP_NUM2];
+
+        uint64_t group = (arrayLength + GROUP_NUM - 1) / GROUP_NUM;
+        {
+	        SystraceSection s("UIManager::batchCreateNode:", arrayLength);
+            size_t ijob = 0;
+	        for (size_t i = 0; i < arrayLength; ++i) {
+			  auto nodeParamObj = nodeParamsArray.getValueAtIndex(runtime, i).getObject(runtime);
+              nodes.emplace_back(nodeParamObj.getProperty(runtime, pnode).getObject(runtime));
+              auto tag = tagFromValue(nodeParamObj.getProperty(runtime, ptag));
+              params.emplace_back(tag,
+	            stringFromValue(runtime, nodeParamObj.getProperty(runtime, puiViewClassName)),
+	            surfaceIdFromValue(runtime, nodeParamObj.getProperty(runtime, prenderLanes)),
+	            std::make_shared<RawProps>(runtime, nodeParamObj.getProperty(runtime, pupdatePayload)),
+	            eventTargetFromValue(runtime, nodeParamObj.getProperty(runtime, pworkInProgress), tag));
+	          auto p = &params[i];
+	          if (!p->eventTarget) {
+	            react_native_assert(false);
+	            return jsi::Value::undefined();
+	          }
+
+              //auto &componentDescriptor = uiManager->componentDescriptorRegistry_->at(p->name); // h00434762
+              //PropsParserContext propsParserContext{p->surfaceId, *uiManager->contextContainer_.get()};
+              //componentDescriptor.parseRawProps(*p->rawProps, propsParserContext);
+
+			  // 规模较少时直接做掉
+              if (do_not_parallel || arrayLength < GROUP_NUM * GROUP_NUM2) {
+                // chy
+                auto sn = uiManager->createNode(p->tag, p->name, p->surfaceId, *p->rawProps, p->eventTarget);
+                nodes[i].setProperty(runtime, pcobj, valueFromShadowNode(runtime, sn));
+                continue;
+              }
+
+              if ((i % group) == (group - 1) || i == (arrayLength - 1)) {
+                  agent->submit([&runtime, &params, &nodes, &pcobj, uiManager, i, group, &agent, stack_base = &stack[ijob * GROUP_NUM2]] {
+                      auto istart = i / group * group;
+                      auto num = i - istart + 1;
+                      uint64_t group2 = (num + GROUP_NUM2 - 1) / GROUP_NUM2; // 每组计算的数量
+					  uint64_t group_num2 = (num + group2 - 1) / group2; // 真正的组数
+
+                      // 前面的group_num2 - 1组交给别人
+                      for (uint64_t g2 = 0; g2 < group_num2 - 1; g2++) {
+                          agent->submit([&runtime, &params, &nodes, &pcobj, uiManager, istart, g2, group2] {
+                              static thread_local auto sf = x::set_affinity({4, 5, 6, 7, 8, 9}); // [opt] switch FFRT thread 绑核
+						      auto is = istart + g2 * group2;
+                              for (uint64_t j = is; j < is + group2; j++) {
+                                  auto p = &params[j];
+                                  auto sn = uiManager->createNode(p->tag, p->name, p->surfaceId, *p->rawProps, p->eventTarget);
+                                  auto& node = nodes[j];
+                                  if (ffrt::is_main()) {
+                                    node.setProperty(runtime, pcobj, valueFromShadowNode(runtime, sn));
+                                  } else
+                                  ffrt::job_agent2::submit_to_master([&] {
+                                    node.setProperty(runtime, pcobj, valueFromShadowNode(runtime, sn));
+                                  });
+                              }
+                          }, &stack_base[g2 + 1]);
+                      }
+
+                      // 自己算最后一组
+				      auto is = istart + (group_num2 - 1) * group2;
+                      for (uint64_t j = is; j <= i; j++) {
+                          auto p = &params[j];
+                          auto sn = uiManager->createNode(p->tag, p->name, p->surfaceId, *p->rawProps, p->eventTarget);
+                          auto& node = nodes[j];
+                          if (ffrt::is_main()) {
+                            node.setProperty(runtime, pcobj, valueFromShadowNode(runtime, sn));
+                          } else
+                          ffrt::job_agent2::submit_to_master([&] {
+                            node.setProperty(runtime, pcobj, valueFromShadowNode(runtime, sn));
+                          });
+                      }
+                  }, &stack[ijob * GROUP_NUM2]);
+                  ijob++;
+              }
+	        }
+            if (!do_not_parallel) {
+                ffrt::job_agent2::wait_client();
+                ffrt::job_queue::singleton()->flush();
+            }
+          }
+        }
+
+        return jsi::Value::undefined();
+      });
