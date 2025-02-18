@@ -1,0 +1,51 @@
+  if (methodName == "batchCloneNodeWithNewProps") {
+    return jsi::Function::createFromHostFunction(
+        runtime,
+        name,
+        1,
+        [uiManager](
+            jsi::Runtime &runtime,
+            jsi::Value const & /*thisValue*/,
+            jsi::Value const *arguments,
+            size_t /*count*/) noexcept -> jsi::Value {
+                LOG(INFO) << "CHY batchCloneNodeWithNewProps:";
+                if (!arguments[0].isObject() || !arguments[0].asObject(runtime).isArray(runtime)) {
+                   LOG(INFO) <<"chy [UIManagercpp_batchCloneNodeWithNewProps ] need array";
+                }
+                LOG(INFO) <<"chy [UIManagercpp_batchCloneNodeWithNewProps ] is array";
+                
+                auto tagPairsArray = arguments[0].asObject(runtime).asArray(runtime);
+                size_t arrayLength = tagPairsArray.length(runtime);
+                LOG(INFO) << "chy1";
+                auto poldProps = jsi::Object::createFromAscii(runtime, "newProps");
+                auto pnewProps = jsi::String::createFromAscii(runtime, "oldProps");
+                LOG(INFO) << "chy2 arrayLength:" << arrayLength;
+                for (size_t i = 0; i < arrayLength; ++i) {
+                    LOG(INFO) << "chy3 i:" << i;
+                    auto tagPairObj = tagPairsArray.getValueAtIndex(runtime, i).getObject(runtime);
+                    LOG(INFO) << "chy3-1";
+                    auto oldProps = shadowNodeFromValue(runtime, tagPairObj.getProperty(runtime, poldProps));
+                    LOG(INFO) << "chy3-2";
+                    auto newProps = RawProps(runtime, tagPairObj.getProperty(runtime, pnewProps));
+                    LOG(INFO) << "chy4";
+                    uiManager->cloneNode(*oldProps, nullptr, &newProps);
+//                     return valueFromShadowNode(
+//                       runtime,
+//                       uiManager->cloneNode(
+//                           *oldProps,
+//                           nullptr,
+//                           &newProps));
+                    LOG(INFO) << "chy5";
+                }
+
+//                 return jsi::Value::undefined();
+//           auto const &rawProps = RawProps(runtime, arguments[1]);
+//           LOG(INFO) << "CHY batchCloneNodeWithNewProps:";
+//           return valueFromShadowNode(
+//               runtime,
+//               uiManager->cloneNode(
+//                   *shadowNodeFromValue(runtime, arguments[0]),
+//                   nullptr,
+//                   &rawProps));
+        });
+  }
