@@ -1,0 +1,47 @@
+"知识点：
+1. 前缀和，一维前缀和，二维前缀和
+2. 差分，一维差分，二维差分
+3. 单调栈
+4. 并查集
+5. 滑动窗口
+6. 二分查找
+7. 字典树
+8. 树和二叉树的遍历
+9. 二维表广度遍历
+10. 图的广度遍历（有向图、无向图）
+11. 图的拓扑排序（有向图）
+12. 动态规划
+13. 深度遍历和剪枝
+14. 其它技巧。"	
+专项	例题
+二分查找	"https://leetcode-cn.com/problems/capacity-to-ship-packages-within-d-days/
+https://leetcode-cn.com/problems/sum-of-mutated-array-closest-to-target/
+https://leetcode-cn.com/problems/swim-in-rising-water/
+https://leetcode-cn.com/problems/preimage-size-of-factorial-zeroes-function/"
+并查集	"https://leetcode-cn.com/problems/number-of-operations-to-make-network-connected/
+https://leetcode-cn.com/problems/graph-valid-tree/
+https://leetcode-cn.com/problems/number-of-connected-components-in-an-undirected-graph/"
+滑动窗口	"https://leetcode-cn.com/problems/minimum-size-subarray-sum/
+https://leetcode-cn.com/problems/longest-repeating-character-replacement/
+https://leetcode-cn.com/problems/longest-substring-without-repeating-characters/
+https://leetcode-cn.com/problems/max-consecutive-ones-iii/
+https://leetcode-cn.com/problems/subarrays-with-k-different-integers/"
+字典树	"中等
+https://leetcode-cn.com/problems/implement-trie-prefix-tree/ （建议完成这道题，并保存为代码模板。）
+https://leetcode-cn.com/problems/add-and-search-word-data-structure-design/
+https://leetcode-cn.com/problems/implement-magic-dictionary/
+https://leetcode-cn.com/problems/search-suggestions-system/
+困难
+https://leetcode-cn.com/problems/palindrome-pairs/
+https://leetcode-cn.com/problems/prefix-and-suffix-search/"
+二维表的广度遍历	"https://leetcode-cn.com/problems/surrounded-regions/
+https://leetcode-cn.com/problems/number-of-islands/
+https://leetcode-cn.com/problems/max-area-of-island/
+https://leetcode-cn.com/problems/check-if-there-is-a-valid-path-in-a-grid/"
+图的bfs	"https://leetcode-cn.com/problems/cheapest-flights-within-k-stops/
+https://leetcode-cn.com/problems/word-ladder/
+https://leetcode-cn.com/problems/word-ladder-ii/"
+图的拓扑排序	"https://leetcode-cn.com/problems/course-schedule/
+https://leetcode-cn.com/problems/loud-and-rich/
+https://leetcode-cn.com/problems/russian-doll-envelopes/
+https://leetcode-cn.com/problems/largest-divisible-subset/"
