@@ -1,0 +1,4 @@
+RN框架中以下无障碍属性不生效，是否有涉及，是否影响上架。
+TouchableWithoutFeedback组件：aria-checked,aria-label,accessibilityValue属性
+Text组件：role属性为searchbox,img,list,slider
+属性：aria-hidden,accessibilityState,accessibiltiyValue,onAccessibilityEscape,onAccessibilityTap
