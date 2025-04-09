@@ -1,0 +1,9 @@
+4	https://gitcode.com/openharmony-sig/ohos_react_native/commit/1622d60c	fix: use unordered_set	refactor: replace array with unordered_set for svg type check
+31	https://gitcode.com/openharmony-sig/ohos_react_native/commit/da6bac25	fix: Standard Code	refactor: rename and add const to svgTypeArr, enhance accessibility handling
+5	https://gitcode.com/openharmony-sig/ohos_react_native/commit/2123e92d	fix: If a single-node component such as svg obtains the root	feat: add svg component type check
+2	https://gitcode.com/openharmony-sig/ohos_react_native/commit/58a6539d	fix: Encodes only Chinese characters.	fix: correctly handle chinese characters in uri encoding
+2	https://gitcode.com/openharmony-sig/ohos_react_native/commit/8a9f716e	fix: Encodes only Chinese characters. (#889)	fix: uri encoding for chinese characters
+4	https://gitcode.com/openharmony-sig/ohos_react_native/commit/f60198b1	fix: The measured width returned in the onTextLayout method	feat: scale line metrics by m_scale
+2	https://gitcode.com/openharmony-sig/ohos_react_native/commit/e160bb27	fix: When textinput sets secureTextEntry, hide the small eye	fix: remove redundant password icon visibility setting
+13	https://gitcode.com/openharmony-sig/ohos_react_native/commit/835f6f24	fix: An issue that cannot be clicked after using the transfo	refactor: introduce m_transform state for component instance
+7	https://gitcode.com/openharmony-sig/ohos_react_native/commit/8823b844	Fixed an issue where iconfont was invalid in cases of multip	refactor: make font collection static
