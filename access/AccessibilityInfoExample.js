@@ -64,7 +64,7 @@ function AccessibilityInfoExample() {
               AccessibilityInfo.addEventListener(
                 'screenReaderChanged',
                 () => {
-                  setScreenReaderChanged('screenReaderChanged!!!!!')
+                  setScreenReaderChanged('screenReaderChanged!!')
                 })
             }}></Button>
           <View style={{ borderWidth: 2, borderColor: 'pink', padding: 10, marginTop: 5 }}>
@@ -130,7 +130,7 @@ function AccessibilityInfoExample() {
         <View style={{ marginBottom: 30, borderWidth: 1, padding: 10, width: 320 }}>
           <Text style={{ fontSize: 18, marginBottom: 5 }}>5.setAccessibilityFocus</Text>
           <Text style={{ marginBottom: 5 }}>属性值：setAccessibilityFocus</Text>
-          <Text style={{ marginBottom: 5 }}>预期结果：点击按钮后，焦点跳转至下方文本内容，且读出文本：setAccessibilityFocus</Text>
+          <Text style={{ marginBottom: 5 }}>预期结果：点击按钮后，焦点跳转至下方文本内容，且读出文本：设置可访问性焦点</Text>
           <Text style={{ marginBottom: 5 }}>实际结果：</Text>
           <Button title="setFocus" onPress={() => {
             if (myRef1 && myRef1.current) {
@@ -138,7 +138,7 @@ function AccessibilityInfoExample() {
             }
           }}>
           </Button>
-          <Text ref={myRef1} style={{ borderWidth: 2, borderColor: 'pink', padding: 10, marginTop: 5 }}>setAccessibilityFocus</Text>
+          <Text ref={myRef1} style={{ borderWidth: 2, borderColor: 'pink', padding: 10, marginTop: 5 }}>设置可访问性焦点</Text>
         </View>
 
         <View style={{ marginBottom: 30, borderWidth: 1, padding: 10, width: 320 }}>
@@ -166,7 +166,7 @@ function AccessibilityInfoExample() {
         <View style={{ marginBottom: 30, borderWidth: 1, padding: 10, width: 320 }}>
           <Text style={{ fontSize: 18, marginBottom: 5 }}>7.sendAccessibilityEvent</Text>
           <Text style={{ marginBottom: 5 }}>属性值：sendAccessibilityEvent</Text>
-          <Text style={{ marginBottom: 5 }}>预期结果：点击按钮后，焦点跳转至下方文本内容，且读出文本：sendAccessibilityEvent</Text>
+          <Text style={{ marginBottom: 5 }}>预期结果：点击按钮后，焦点跳转至下方文本内容，且读出文本：发送可访问性事件</Text>
           <Text style={{ marginBottom: 5 }}>实际结果：</Text>
           <Button title="sendEvent" onPress={() => {
             if (myRef && myRef.current) {
@@ -174,7 +174,7 @@ function AccessibilityInfoExample() {
             }
           }}>
           </Button>
-          <Text ref={myRef} style={{ borderWidth: 2, borderColor: 'pink', padding: 10, marginTop: 5 }}>sendAccessibilityEvent</Text>
+          <Text ref={myRef} style={{ borderWidth: 2, borderColor: 'pink', padding: 10, marginTop: 5 }}>发送可访问性事件</Text>
         </View>
       </View>
     </ScrollView>
