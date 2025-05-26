@@ -1,11 +1,12 @@
 const fs = require('fs');
 const path = require('path');
+const semver = require('semver'); // 需要先运行 npm install semver
 
 const projectsDir = path.join(__dirname, 'projects');
 const outputFile = path.join(__dirname, 'dependencies-report.txt');
 const depsMap = {};
 
-// 构建带版本号的依赖映射
+// 遍历项目目录
 fs.readdirSync(projectsDir).forEach(projectName => {
   const projectPath = path.join(projectsDir, projectName);
   const pkgJsonPath = path.join(projectPath, 'package.json');
@@ -15,55 +16,51 @@ fs.readdirSync(projectsDir).forEach(projectName => {
       const pkg = JSON.parse(fs.readFileSync(pkgJsonPath, 'utf8'));
       const dependencies = pkg.dependencies || {};
       
-      Object.keys(dependencies).forEach(dep => {
-        // 初始化依赖项记录
+      Object.entries(dependencies).forEach(([dep, version]) => {
         if (!depsMap[dep]) {
-          depsMap[dep] = [];
+          depsMap[dep] = {
+            maxVersion: null,
+            projects: []
+          };
         }
         
-        // 检查是否已存在相同项目的记录
-        const existingIndex = depsMap[dep].findIndex(
-          item => item.project === projectName
-        );
+        // 记录项目版本信息
+        depsMap[dep].projects.push({
+          project: projectName,
+          version
+        });
 
-        // 不存在则添加，存在则更新版本
-        if (existingIndex === -1) {
-          depsMap[dep].push({
-            project: projectName,
-            version: dependencies[dep]
-          });
-        } else {
-          depsMap[dep][existingIndex].version = dependencies[dep];
+        // 计算最高版本（清洗语义化版本）
+        const cleanVersion = version.replace(/^[\^~]/g, '');
+        if (semver.valid(cleanVersion)) {
+          if (!depsMap[dep].maxVersion || semver.gt(cleanVersion, depsMap[dep].maxVersion)) {
+            depsMap[dep].maxVersion = cleanVersion;
+          }
         }
       });
     } catch (error) {
-      console.error(`[错误] 处理项目 ${projectName}:`, error.message);
+      console.error(`处理项目 ${projectName} 失败:`, error.message);
     }
   }
 });
 
-// 构建输出内容
+// 生成报告
 let output = '';
 Object.keys(depsMap)
-  .sort()  // 按依赖名称排序
-  .forEach(dependency => {
-    // 按项目名称排序
-    const sortedProjects = depsMap[dependency].sort((a, b) => 
-      a.project.localeCompare(b.project)
-    );
+  .sort()
+  .forEach((dep, index) => {
+    const entry = depsMap[dep];
+    output += `${index + 1}. ${dep} (最高版本: ${entry.maxVersion || '未知'})\n`;
     
-    output += `${dependency}:\n`;
-    sortedProjects.forEach(({ project, version }) => {
-      output += `  ${project}@${version}\n`;
-    });
-    output += '\n';  // 不同依赖之间空一行
+    entry.projects
+      .sort((a, b) => a.project.localeCompare(b.project))
+      .forEach(p => {
+        output += `   ${p.project}@${p.version}\n`;
+      });
+    
+    output += '\n';
   });
 
 // 写入文件
-try {
-  fs.writeFileSync(outputFile, output.trim(), 'utf8');
-  console.log(`✅ 依赖报告已生成：${outputFile}`);
-} catch (error) {
-  console.error('🆘 文件写入失败:', error.message);
-  process.exit(1);
-}
+fs.writeFileSync(outputFile, output.trim());
+console.log(`报告已生成：${outputFile}`);

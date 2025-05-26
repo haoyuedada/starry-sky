@@ -1,0 +1,8 @@
+{
+  "name": "react-native-harmony-tester",
+  "version": "0.0.1",
+  "private": true,
+  "dependencies": {
+    "semver": "^7.7.2"
+  }
+}
