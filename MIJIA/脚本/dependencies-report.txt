@@ -1,0 +1,43 @@
+1. @gorhom/portal (最高版本: 1.0.14)
+   aa@^1.0.14
+   cc@^1.0.14
+   mm@^1.0.14
+
+2. chai (最高版本: 4.3.7)
+   aa@4.3.7
+   cc@4.3.7
+   mm@4.3.7
+
+3. d3-scale-chromatic (最高版本: 3.0.0)
+   aa@^3.0.0
+   cc@^3.0.0
+   mm@^3.0.0
+
+4. react (最高版本: 18.2.0)
+   aa@18.2.0
+   cc@18.2.0
+   mm@18.2.0
+
+5. react-nativde-harmony (最高版本: 未知)
+   cc@file:../react-native-harmony/rnoh-react-native-harmony-0.72.72.tgz
+
+6. react-native (最高版本: 0.72.5)
+   cc@0.72.5
+   mm@0.72.5
+
+7. react-native-flipper-performance-plugin (最高版本: 0.4.0)
+   aa@^0.4.0
+   cc@^0.4.0
+   mm@^0.4.0
+
+8. react-native-harmony (最高版本: 未知)
+   aa@file:../react-native-harmony/rnoh-react-native-harmony-0.72.72.tgz
+   mm@file:../react-native-harmony/rnoh-react-native-harmony-0.72.72.tgz
+
+9. react-native-harmony-sample-package (最高版本: 未知)
+   aa@file:../react-native-harmony-sample-package/react-native-harmony-sample-package-1.0.0.tgz
+   cc@file:../react-native-harmony-sample-package/react-native-harmony-sample-package-1.0.0.tgz
+   mm@file:../react-native-harmony-sample-package/react-native-harmony-sample-package-1.0.0.tgz
+
+10. reactd-native (最高版本: 0.72.5)
+   aa@0.72.5
